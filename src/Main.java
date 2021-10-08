@@ -14,7 +14,7 @@ import java.io.InputStream;
 
 public class Main {
     public static void main(String args[]){
-        String fileName = "designed_testcase/temp.mx" ;
+        String fileName = "designed_testcase/temp.mx" ; // todo 把所有可能出 null 的加特判
         try {
             InputStream input = new FileInputStream(fileName) ;
             RootNode ASTRoot ;
@@ -33,5 +33,5 @@ public class Main {
 //            throw new RuntimeException() ;
         }
         System.out.println("hello world");
-    }
+    } // todo 可以用 getText 来打印错误 // todo 到时候用 == null 和 size == 0 同时判空
 }
