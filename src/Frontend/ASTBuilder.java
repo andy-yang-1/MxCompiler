@@ -2,12 +2,10 @@ package Frontend;
 
 import ASTNodeType.ASTNode;
 import ASTNodeType.DefNodeType.*;
-import ASTNodeType.ExprNodeType.ExprNode;
-import ASTNodeType.ExprNodeType.NewExprNode;
+import ASTNodeType.ExprNodeType.*;
 import ASTNodeType.ExprNodeType.NewExprNodeType.ConstructNewNode;
 import ASTNodeType.ExprNodeType.NewExprNodeType.FunctionNewNode;
 import ASTNodeType.ExprNodeType.NewExprNodeType.NormalNewNode;
-import ASTNodeType.ExprNodeType.PrimaryNode;
 import ASTNodeType.RootNode;
 import ASTNodeType.StmtNodeType.*;
 import ASTNodeType.UnitNode;
@@ -215,6 +213,9 @@ public class ASTBuilder extends MxStarBaseVisitor<ASTNode> {
         } else if (ctx.primary().literal() != null) {
             temp_node.primaryType = Type.elementCategory.literalType;
             temp_node.primaryStr = ctx.primary().literal().getText();
+        }else if ( ctx.primary().Identifier() != null ){
+            temp_node.primaryType = Type.elementCategory.identifierType ;
+            temp_node.primaryStr = ctx.primary().Identifier().getText() ;
         }
         return temp_node;
     }
@@ -259,6 +260,57 @@ public class ASTBuilder extends MxStarBaseVisitor<ASTNode> {
         FunctionNewNode temp_node = new FunctionNewNode(new position(ctx));
         temp_node.func_node = (FuncDefNode) visit(ctx.functionDef());
         return temp_node;
+    }
+
+    @Override
+    public ASTNode visitIndexExpr(MxStarParser.IndexExprContext ctx){
+        IndexExprNode temp_node = new IndexExprNode(new position(ctx)) ;
+        temp_node.expr1 = (ExprNode) visit(ctx.expr1) ;
+        temp_node.expr2 = (ExprNode) visit(ctx.expr2) ;
+        return temp_node ;
+    }
+
+    @Override
+    public ASTNode visitFunctionExpr(MxStarParser.FunctionExprContext ctx){
+        FuncExprNode temp_node = new FuncExprNode(new position(ctx)) ;
+        temp_node.expr = (ExprNode) visit(ctx.expression()) ;
+        if ( ctx.expressionList() != null ){
+            for ( var each : ctx.expressionList().expression() ){
+                temp_node.parList.add((ExprNode) visit(each)) ;
+            }
+        }
+        return temp_node ;
+    } // todo consider lambda function
+
+    @Override
+    public ASTNode visitBinaryExpr(MxStarParser.BinaryExprContext ctx){
+        BinaryExprNode temp_node = new BinaryExprNode(new position(ctx)) ;
+        temp_node.expr1 = (ExprNode) visit(ctx.expr1) ;
+        temp_node.expr2 = (ExprNode) visit(ctx.expr2) ;
+        temp_node.op = ctx.op.getText() ;
+        return temp_node ;
+    }
+
+    @Override
+    public ASTNode visitSelfPreExpr(MxStarParser.SelfPreExprContext ctx){
+        SelfPreExprNode temp_node = new SelfPreExprNode(new position(ctx),ctx.op.getText()) ;
+        temp_node.exprNode = (ExprNode) visit(ctx.expression()) ;
+        return temp_node ;
+    }
+
+    @Override
+    public ASTNode visitSelfSufExpr(MxStarParser.SelfSufExprContext ctx){
+        SelfSufExprNode temp_node = new SelfSufExprNode(new position(ctx),ctx.op.getText()) ;
+        temp_node.exprNode = (ExprNode) visit(ctx.expression()) ;
+        return temp_node ;
+    }
+
+    @Override
+    public ASTNode visitAssignExpr(MxStarParser.AssignExprContext ctx){
+        AssignExprNode temp_node = new AssignExprNode(new position(ctx)) ;
+        temp_node.expr1 = (ExprNode) visit(ctx.expr1) ;
+        temp_node.expr2 = (ExprNode) visit(ctx.expr2) ;
+        return temp_node ;
     }
 
 
