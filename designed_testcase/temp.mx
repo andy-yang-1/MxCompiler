@@ -1,0 +1,6 @@
+
+int k1 = 1 , k2 = 2 ;
+int main(){
+    int a = 0 ;
+    return 0 ;
+}
