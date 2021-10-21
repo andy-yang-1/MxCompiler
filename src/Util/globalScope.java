@@ -8,10 +8,12 @@ import java.util.HashMap;
 
 public class globalScope {
 
-    public HashMap<String,Type> members ; // variable name -> type
+    public HashMap<String,SingleDefNode> members ; // variable name -> type
     public HashMap<String, FuncDefNode> funcs ; // function name -> return type
     public HashMap<String, ClassDefNode> registered_class ; // class name -> ClassDefNode
     public boolean inFunc , inClass ;
+
+    // todo 主要依靠 global scope 来实现代码复用 内部需要很多函数
 
     public globalScope( Scope temp_scope ){
         members = new HashMap<>() ;
@@ -48,21 +50,55 @@ public class globalScope {
 
         // string method
         ClassDefNode s_node = registered_class.get("string") ;
-        s_node.funcDefInClass.put("length",new FuncDefNode(temp_pos,"length",new Type("int",0))) ;
-        s_node.funcDefInClass.put("substring",new FuncDefNode(temp_pos,"substring",new Type("string",0))) ;
-        (s_node.funcDefInClass.get("substring")).parList.add(new SingleDefNode(temp_pos,"left",new Type("int",0))) ;
-        (s_node.funcDefInClass.get("substring")).parList.add(new SingleDefNode(temp_pos,"right",new Type("int",0))) ;
-        s_node.funcDefInClass.put("parseInt",new FuncDefNode(temp_pos,"parseInt",new Type("int",0))) ;
-        s_node.funcDefInClass.put("ord",new FuncDefNode(temp_pos,"ord",new Type("int",0))) ;
-        (s_node.funcDefInClass.get("ord")).parList.add(new SingleDefNode(temp_pos,"pos",new Type("int",0))) ;
+        s_node.funcRegisteredInClass.put("length",new FuncDefNode(temp_pos,"length",new Type("int",0))) ;
+        s_node.funcRegisteredInClass.put("substring",new FuncDefNode(temp_pos,"substring",new Type("string",0))) ;
+        (s_node.funcRegisteredInClass.get("substring")).parList.add(new SingleDefNode(temp_pos,"left",new Type("int",0))) ;
+        (s_node.funcRegisteredInClass.get("substring")).parList.add(new SingleDefNode(temp_pos,"right",new Type("int",0))) ;
+        s_node.funcRegisteredInClass.put("parseInt",new FuncDefNode(temp_pos,"parseInt",new Type("int",0))) ;
+        s_node.funcRegisteredInClass.put("ord",new FuncDefNode(temp_pos,"ord",new Type("int",0))) ;
+        (s_node.funcRegisteredInClass.get("ord")).parList.add(new SingleDefNode(temp_pos,"pos",new Type("int",0))) ;
 
     }
 
-    public boolean containVar( String varName ){
-        return members.containsKey(varName) ;
+    public boolean containVar( String temp_varName ){
+        return members.containsKey(temp_varName) ;
     }
 
-    public Type getType( String varName ){
-        return members.get(varName) ;
+    public boolean containFunc( String temp_funcName ){ return funcs.containsKey(temp_funcName) ; }
+
+    public boolean containClass(String temp_className){ return registered_class.containsKey(temp_className) ; }
+
+    public boolean hasSuchMember( String temp_className , String temp_memberName ){
+        if ( !containClass(temp_className) ) return false ;
+        return registered_class.get(temp_className).varRegisteredInClass.containsKey(temp_memberName) ;
     }
+
+    public boolean hasSuchMethod( String temp_className , String temp_methodName ){
+        if ( !containClass(temp_className) ) return false ;
+        return registered_class.get(temp_className).funcRegisteredInClass.containsKey(temp_methodName) ;
+    }
+
+    public Type getFuncType( String temp_funcName ){
+        if ( !funcs.containsKey(temp_funcName) ){
+            return null ;
+        }
+        return funcs.get(temp_funcName).retType ;
+    }
+
+    public Type getVarType( String temp_varName ){
+        if ( !members.containsKey(temp_varName) )
+            return null ;
+        return members.get(temp_varName).parType ;
+    }
+
+    public Type getMemberType( String temp_className , String temp_memberName ){
+        if (!hasSuchMember(temp_className,temp_memberName)) return null ;
+        return registered_class.get(temp_className).varRegisteredInClass.get(temp_memberName).parType ;
+    }
+
+    public Type getMethodType( String temp_className , String temp_methodName ){
+        if (!hasSuchMethod(temp_className,temp_methodName)) return null ;
+        return registered_class.get(temp_className).funcRegisteredInClass.get(temp_methodName).retType ;
+    }
+
 }

@@ -33,7 +33,7 @@ classDef
 constructorDef
     : Identifier '(' functionParaList? ')' suite ;
 
-type : basicType '[]'* ;
+type : basicType ('[' ']')* ;
 
 basicType
     : Int
@@ -90,8 +90,8 @@ expression
 expressionList : expression (','expression)* ;
 
 newType
-    : basicType('['expression']')*(('[]')+('['expression']')+)(('[]')('['expression']'))*('[]')*    #wrongNew
-    | basicType('['expression']')*('[]')*                                                           #normalNew
+    : basicType('['expression']')*(('[' ']')+('['expression']')+)(('[' ']')('['expression']'))*('['']')*    #wrongNew
+    | basicType('['expression']')*('[' ']')*                                                           #normalNew
     | basicType '(' expressionList? ')'                                                             #constructNew
     | functionDef                                                                                   #functionNew
     ;

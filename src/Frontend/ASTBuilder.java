@@ -90,7 +90,7 @@ public class ASTBuilder extends MxStarBaseVisitor<ASTNode> {
             for (var each : ctx.variableDef()) {
                 VarDefStmtNode temp_var_stmt = (VarDefStmtNode) visit(each);
                 for (var single_each : temp_var_stmt.singleDefList) {
-                    temp_node.varDefsInClass.put(single_each.parName, single_each);
+                    temp_node.varDefsInClass.add(single_each);
                 }
             }
         if (ctx.constructorDef() != null)
@@ -101,7 +101,7 @@ public class ASTBuilder extends MxStarBaseVisitor<ASTNode> {
         if (ctx.functionDef() != null)
             for (var each : ctx.functionDef()) {
                 FuncDefNode temp_func_node = (FuncDefNode) visit(each);
-                temp_node.funcDefInClass.put(temp_func_node.funcName, temp_func_node);
+                temp_node.funcDefInClass.add(temp_func_node);
             }
         return temp_node;
     }
@@ -213,6 +213,17 @@ public class ASTBuilder extends MxStarBaseVisitor<ASTNode> {
         } else if (ctx.primary().literal() != null) {
             temp_node.primaryType = Type.elementCategory.literalType;
             temp_node.primaryStr = ctx.primary().literal().getText();
+            if ( ctx.primary().literal().DecimalInteger() != null ){
+                temp_node.real_literalType = Type.elementCategory.literalDecimal ;
+            }else if ( ctx.primary().literal().True() != null ){
+                temp_node.real_literalType = Type.elementCategory.literalTrue ;
+            }else if ( ctx.primary().literal().False() != null ){
+                temp_node.real_literalType = Type.elementCategory.literalFalse ;
+            }else if ( ctx.primary().literal().Null() != null ){
+                temp_node.real_literalType = Type.elementCategory.literalNull ;
+            }else{
+                temp_node.real_literalType = Type.elementCategory.literalString ;
+            }
         }else if ( ctx.primary().Identifier() != null ){
             temp_node.primaryType = Type.elementCategory.identifierType ;
             temp_node.primaryStr = ctx.primary().Identifier().getText() ;
@@ -288,7 +299,7 @@ public class ASTBuilder extends MxStarBaseVisitor<ASTNode> {
         temp_node.expr1 = (ExprNode) visit(ctx.expr1) ;
         temp_node.expr2 = (ExprNode) visit(ctx.expr2) ;
         temp_node.op = ctx.op.getText() ;
-        return temp_node ;
+        return temp_node ; // todo add idExprNode
     }
 
     @Override
@@ -313,5 +324,14 @@ public class ASTBuilder extends MxStarBaseVisitor<ASTNode> {
         return temp_node ;
     }
 
+    @Override
+    public ASTNode visitIdExpr(MxStarParser.IdExprContext ctx){
+        IdExprNode temp_node = new IdExprNode(new position(ctx)) ;
+        temp_node.expr = (ExprNode) visit(ctx.expr1) ;
+        temp_node.ID = ctx.Identifier().getText() ;
+        return temp_node ;
+    }
+
+    // todo 可以加一个 print 函数 全局输出 AST 树形结构
 
 }

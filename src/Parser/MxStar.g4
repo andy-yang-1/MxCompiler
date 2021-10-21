@@ -33,7 +33,7 @@ classDef
 constructorDef
     : Identifier '(' functionParaList? ')' suite ;
 
-type : basicType '[]'* ;
+type : basicType ('[' ']')* ;
 
 basicType
     : Int
@@ -81,7 +81,7 @@ expression
     | expr1=expression op = '|' expr2=expression                                #binaryExpr
     | expr1=expression op = '&&' expr2=expression                               #binaryExpr
     | expr1=expression op = '||' expr2=expression                               #binaryExpr
-    | expr1=expression op = '.' expr2=expression                                #binaryExpr
+    | expr1=expression op = '.' Identifier                                #idExpr
     | <assoc=right> op = ('++'|'--'|'+'|'-'|'!'|'~') expression     #selfPreExpr
     | expression op = ('++'|'--')                                   #selfSufExpr
     | <assoc=right> expr1=expression '=' expr2=expression                       #assignExpr
@@ -90,8 +90,8 @@ expression
 expressionList : expression (','expression)* ;
 
 newType
-    : basicType('['expression']')*(('[]')+('['expression']')+)(('[]')('['expression']'))*('[]')*    #wrongNew
-    | basicType('['expression']')*('[]')*                                                           #normalNew
+    : basicType('['expression']')*(('[' ']')+('['expression']')+)(('[' ']')('['expression']'))*('['']')*    #wrongNew
+    | basicType('['expression']')*('[' ']')*                                                           #normalNew
     | basicType '(' expressionList? ')'                                                             #constructNew
     | functionDef                                                                                   #functionNew
     ;

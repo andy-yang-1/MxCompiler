@@ -8,6 +8,7 @@ import Util.position;
 public class PrimaryNode extends ExprNode {
 
     public Type.elementCategory primaryType ;
+    public Type.elementCategory real_literalType ;
     public ExprNode exp ;
     public String primaryStr ;
 

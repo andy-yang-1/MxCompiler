@@ -25,6 +25,22 @@ public class FuncDefNode extends UnitNode {
         retType = temp_type ;
     }
 
+    public boolean hasSuchVar( String tempVarName ){
+        for ( var each : parList ){
+            if ( each.parName.equals(tempVarName) )
+                return true ;
+        }
+        return false ;
+    }
+
+    public Type getVarType( String tempVarName ){
+        for ( var each : parList ){
+            if ( each.parName.equals(tempVarName) )
+                return each.parType ;
+        }
+        return null ;
+    }
+
     @Override
     public void accept(ASTVisitor vis) {
         vis.visit(this);

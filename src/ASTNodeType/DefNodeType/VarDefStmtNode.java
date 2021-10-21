@@ -12,6 +12,7 @@ import java.util.ArrayList;
 public class VarDefStmtNode extends StmtNode {
     public Type varType ;
     public ArrayList<SingleDefNode> singleDefList ;
+
     public VarDefStmtNode(position temp_pos) {
         super(temp_pos);
         singleDefList = new ArrayList<>() ;

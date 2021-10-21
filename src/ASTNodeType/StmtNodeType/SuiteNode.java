@@ -1,6 +1,7 @@
 package ASTNodeType.StmtNodeType;
 
 import ASTNodeType.ASTVisitor;
+import Util.Type;
 import Util.position;
 
 import java.util.ArrayList;
@@ -8,9 +9,6 @@ import java.util.ArrayList;
 public class SuiteNode extends StmtNode {
     public ArrayList<StmtNode> allStmt ;
 
-    boolean inFunc ;
-    boolean inClass ;
-    boolean inLoop ;
 
     public SuiteNode(position temp_pos) {
         super(temp_pos);

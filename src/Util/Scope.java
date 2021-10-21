@@ -1,10 +1,12 @@
 package Util;
 
+import ASTNodeType.DefNodeType.SingleDefNode;
+
 import java.util.HashMap;
 
 public class Scope {
 
-    public HashMap<String,Type> members ;
+    public HashMap<String, SingleDefNode> members ;
     public boolean inFunc , inClass ;
     public Scope parentScope ;
 
@@ -18,7 +20,22 @@ public class Scope {
     }
 
     public Type getType( String varName ){
-        return members.get(varName) ;
+        return members.get(varName).parType ;
+    }
+
+    public boolean ContainVarAllSearch( String varName ){
+        if ( containVar(varName) ) return true ;
+        if ( parentScope != null ) return parentScope.ContainVarAllSearch(varName);
+        return false ;
+    }
+
+    public Type GetTypeAllSearch( String varName ){
+        if ( !ContainVarAllSearch(varName) ) return null ;
+        if ( containVar(varName) ){
+            return getType(varName) ;
+        }else{
+            return parentScope.GetTypeAllSearch(varName);
+        }
     }
 
 }

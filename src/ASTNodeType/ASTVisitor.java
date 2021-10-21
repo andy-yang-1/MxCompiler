@@ -2,6 +2,9 @@ package ASTNodeType;
 
 import ASTNodeType.DefNodeType.* ;
 import ASTNodeType.ExprNodeType.* ;
+import ASTNodeType.ExprNodeType.NewExprNodeType.ConstructNewNode;
+import ASTNodeType.ExprNodeType.NewExprNodeType.FunctionNewNode;
+import ASTNodeType.ExprNodeType.NewExprNodeType.NormalNewNode;
 import ASTNodeType.StmtNodeType.* ;
 
 public interface ASTVisitor {
@@ -27,4 +30,9 @@ public interface ASTVisitor {
     public void visit( ContinueStmtNode tempNode ) ;
     public void visit( BreakStmtNode tempNode ) ;
     public void visit( ReturnStmtNode tempNode ) ;
+    public void visit( IdExprNode tempNode );
+    public void visit( ConstructNewNode tempNode ) ;
+    public void visit( FunctionNewNode tempNode ) ;
+    public void visit( NormalNewNode tempNode ) ;
+    public void visit( PureExprStmtNode tempNode ) ;
 }

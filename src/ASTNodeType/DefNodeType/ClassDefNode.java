@@ -13,15 +13,19 @@ public class ClassDefNode extends UnitNode {
 
     public String className ;
 
-    public HashMap<String,SingleDefNode> varDefsInClass ;
-    public HashMap<String,FuncDefNode> funcDefInClass ;
+    public ArrayList<SingleDefNode> varDefsInClass ;
+    public HashMap<String,SingleDefNode> varRegisteredInClass ;
+    public ArrayList<FuncDefNode> funcDefInClass ; // 仅仅是在 builder 里留出空间
+    public HashMap<String,FuncDefNode> funcRegisteredInClass ; // symbol collect 使用
     public ArrayList<ConstructorDefNode> constructorDefInClass ;
 
     public ClassDefNode( String class_name , position pos ){
         super(pos) ;
         className = class_name ;
-        this.varDefsInClass = new HashMap<>() ;
-        this.funcDefInClass = new HashMap<>() ;
+        this.varDefsInClass = new ArrayList<>() ;
+        varRegisteredInClass = new HashMap<>() ;
+        this.funcDefInClass = new ArrayList<>() ;
+        this.funcRegisteredInClass = new HashMap<>() ;
         this.constructorDefInClass = new ArrayList<ConstructorDefNode>() ;
     }
 
@@ -29,5 +33,6 @@ public class ClassDefNode extends UnitNode {
     public void accept(ASTVisitor vis){
         vis.visit(this);
     }
+
 
 }

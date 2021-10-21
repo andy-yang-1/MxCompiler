@@ -1,10 +1,12 @@
 import ASTNodeType.ASTNode;
 import ASTNodeType.RootNode;
 import Frontend.ASTBuilder;
+import Frontend.SymbolCollector;
 import Parser.MxStarLexer;
 import Parser.MxStarParser;
 import Util.MxStarErrorListener;
 import Util.error.error;
+import Util.globalScope;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -27,10 +29,15 @@ public class Main {
             ParseTree parseTreeRoot = parser.program() ;
             ASTBuilder astBuilder = new ASTBuilder(null) ;
             ASTRoot = (RootNode) astBuilder.visit(parseTreeRoot) ;
+            globalScope gScope = new globalScope(null) ;
+            SymbolCollector symbolCollector = new SymbolCollector(gScope) ;
+            ASTRoot.accept(symbolCollector);
             System.out.println("hello world");
-        } catch (Exception e){ // todo here fail to catch the error in fromStream
-            System.out.println(e.toString());
-//            throw new RuntimeException() ;
+        } catch (error e){ // todo here fail to catch the error in fromStream
+            System.err.println(e.toString());
+            throw new RuntimeException() ;
+        } catch (Exception er){
+            System.err.println(er.toString());
         }
         System.out.println("hello world");
     } // todo 可以用 getText 来打印错误 // todo 到时候用 == null 和 size == 0 同时判空

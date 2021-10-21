@@ -13,6 +13,11 @@ public class Type {
         dimension = dim ;
     }
 
+    public Type( Type other ){
+        typeName = new String(other.typeName) ;
+        dimension = other.dimension;
+    }
+
     public Type(MxStarParser.TypeContext ctx){
         typeName = ctx.basicType().getText() ;
         String temp_str = ctx.basicType().getText() ;
@@ -24,9 +29,49 @@ public class Type {
         }
     }
 
-    public boolean Equal( Type other ){
+    public boolean equals( Type other ){
         return this.typeName.equals(other.typeName) && this.dimension == other.dimension;
     }
+
+    public boolean isSameType( Type other ){
+        return this.typeName.equals(other.typeName) ;
+    }
+
+    public String getTypeName(){
+        return typeName ;
+    }
+
+    public int getDimension(){
+        return dimension ;
+    }
+
+    public static boolean isConservedWord( String temp_word ){ // 判断是否是保留字
+        String[] ConservedPool = {"int","bool","string","void","true","false","if","else","while","for","return","continue","break","this","new","null","class"} ;
+        for ( var each : ConservedPool ){
+            if ( temp_word.equals(each) )
+                return true ;
+        }
+        return false ;
+    }
+
+    public boolean isNull(){ return typeName.equals("null") ; }
+
+    public boolean isInt(){ return typeName.equals("int") && dimension == 0 ; }
+
+    public boolean isBool(){ return typeName.equals("bool") && dimension == 0 ; }
+
+    public boolean isString(){ return typeName.equals("string") && dimension == 0 ; }
+
+    public boolean isVoid(){ return typeName.equals("void") && dimension == 0 ; }
+
+    public boolean isAssignable( Type other ){
+        if ( this.equals(other) ) return true ;
+        if ( other.isNull() ){
+            return ((!this.isInt() && !this.isBool())||this.getDimension() > 0) && !this.isNull() ;
+        }
+        return false ;
+    }
+
     public enum elementCategory{
         normalType ,
         indexType , // [][]
@@ -38,7 +83,12 @@ public class Type {
         varInit ,
         exprInit ,
         hasFalseStmt ,
-        onlyTrueStmt
+        onlyTrueStmt ,
+        literalDecimal ,
+        literalTrue ,
+        literalFalse ,
+        literalNull ,
+        literalString
     }
 }
 
