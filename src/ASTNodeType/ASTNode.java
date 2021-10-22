@@ -9,6 +9,7 @@ abstract public class ASTNode {
 
     public boolean inClass = false ;
     public boolean inFunc = false ;
+    public boolean paraShot = false ;
     public String inClassName ;
     public FuncDefNode inClassFunc = null ;
 

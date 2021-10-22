@@ -64,6 +64,8 @@ public class Type {
 
     public boolean isVoid(){ return typeName.equals("void") && dimension == 0 ; }
 
+    public boolean isBasic(){ return isInt() || isBool() ; }
+
     public boolean isAssignable( Type other ){
         if ( this.equals(other) ) return true ;
         if ( other.isNull() ){

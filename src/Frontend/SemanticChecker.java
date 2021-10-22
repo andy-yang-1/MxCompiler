@@ -25,8 +25,7 @@ public class SemanticChecker implements ASTVisitor {
     }
 
     public static boolean isSameTypeExp( ExprNode exp1 , ExprNode exp2 ){
-        // todo 检查两个表达式是否是相同的类 -> 递归查找 ; if wrong -> throw ?
-        // todo visit expr 结束后必须将 expType 赋值 且必须在 visit 之前赋给他 class loop 信息
+        //visit expr 结束后必须将 expType 赋值 且必须在 visit 之前赋给他 class loop 信息
         return exp1.expType.equals(exp2.expType) ;
     }
 
@@ -109,6 +108,7 @@ public class SemanticChecker implements ASTVisitor {
         tempNode.allStmt.inClass = tempNode.inClass;
         tempNode.allStmt.retType = tempNode.retType; // todo 每一个 stmt 都有可能是 return statement
         tempNode.allStmt.inClassFunc = tempNode ;
+        tempNode.paraShot = true ; // 要求 suite 将参数射入 scope 内
         tempNode.allStmt.accept(this); // todo 去到 suite 内再判等
     //    currentScope = currentScope.parentScope ; // 离开 scope
     }
@@ -128,7 +128,7 @@ public class SemanticChecker implements ASTVisitor {
                 throw new semanticError("member type can't match ",tempNode.nodePos) ;
             }
         }
-        if ( currentScope.containVar(tempNode.parName) || ( tempNode.inClassFunc != null && tempNode.inClassFunc.hasSuchVar(tempNode.parName) ) ){
+        if ( currentScope.containVar(tempNode.parName)  ){
             throw new semanticError("redefinition of member ", tempNode.nodePos);
         }
         currentScope.members.put(tempNode.parName,tempNode) ;
@@ -143,12 +143,10 @@ public class SemanticChecker implements ASTVisitor {
     }
 
     @Override
-    public void visit(PrimaryNode tempNode) {
+    public void visit(PrimaryNode tempNode) { // todo 全局找 containVar 的问题
         switch (tempNode.primaryType){
             case exprType :
-                tempNode.exp.inClass = tempNode.inClass ;
-                tempNode.exp.inFunc = tempNode.inFunc ;
-                tempNode.exp.inClassName = tempNode.inClassName;
+                deliverSituation(tempNode,tempNode.exp);
                 tempNode.exp.accept(this);
                 tempNode.expType = tempNode.exp.expType ;
                 tempNode.isLeftValue = tempNode.exp.isLeftValue ;
@@ -184,9 +182,9 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(BinaryExprNode tempNode) {
-        tempNode.expr1.inFunc = tempNode.expr2.inFunc = tempNode.inFunc ;
-        tempNode.expr1.inClass = tempNode.expr2.inClass = tempNode.inClass ; // todo accept 需要在父表达式继承 inFunc inClass
-        tempNode.expr1.inClassName = tempNode.expr2.inClassName = tempNode.inClassName ;
+        // todo accept 需要在父表达式继承 inFunc inClass
+        deliverSituation(tempNode,tempNode.expr1);
+        deliverSituation(tempNode,tempNode.expr2);
         tempNode.expr1.accept(this);
         tempNode.expr2.accept(this);
         tempNode.isLeftValue = false ;
@@ -194,7 +192,7 @@ public class SemanticChecker implements ASTVisitor {
         // ( int , int ) -> int (only)
         Type IntType = new Type("int",0) , BoolType = new Type("bool",0) , StringType = new Type("string",0) ;
         if ( op.equals("*") || op.equals("/") || op.equals("-") || op.equals("%") || op.equals("<<") || op.equals(">>") || op.equals("&") || op.equals("|") || op.equals("^") ){
-            if ( !tempNode.expr1.expType.isInt() || !tempNode.expr2.expType.isInt() ){
+            if ( !tempNode.expr1.expType.isInt() || !tempNode.expr2.expType.isInt() ){ // 这里 isInt 不允许是 array
                 throw new semanticError("operator can't match type",tempNode.nodePos) ;
             }
             tempNode.expType = IntType ;
@@ -210,10 +208,12 @@ public class SemanticChecker implements ASTVisitor {
         }
         // ( A , B ) -> bool (only)
         if ( op.equals("==") || op.equals("!=") ){
-            if ( tempNode.expr1.expType.equals(tempNode.expr2.expType) || tempNode.expr1.expType.isNull() || tempNode.expr2.expType.isNull() ){
-                tempNode.expType = BoolType ;
+            tempNode.expType = BoolType ;
+            if ( tempNode.expr1.expType.equals(tempNode.expr2.expType)  )
                 return ;
-            }
+            if ( (tempNode.expr1.expType.isNull() && !tempNode.expr2.expType.isBasic()) || ( tempNode.expr2.expType.isNull() && !tempNode.expr1.expType.isBasic() ) )
+                return ;
+
             throw new semanticError("operator can't match type",tempNode.nodePos) ;
         }
         // ( int , int ) / ( string , string ) -> int / string / bool
@@ -227,7 +227,7 @@ public class SemanticChecker implements ASTVisitor {
                 tempNode.expType = BoolType ;
             }
         }
-        throw new semanticError("can't handle all situation", tempNode.nodePos) ;
+        throw new semanticError("can't handle the situation " + op, tempNode.nodePos) ;
     }
 
     @Override
@@ -237,9 +237,8 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(IndexExprNode tempNode) { // todo 精简成 deliver class
-        tempNode.expr1.inFunc = tempNode.expr2.inFunc = tempNode.inFunc ;
-        tempNode.expr1.inClass = tempNode.expr2.inClass = tempNode.inClass ;
-        tempNode.expr1.inClassName = tempNode.expr2.inClassName = tempNode.inClassName ;
+        deliverSituation(tempNode,tempNode.expr1);
+        deliverSituation(tempNode,tempNode.expr2);
         tempNode.expr1.accept(this);
         tempNode.expr2.accept(this);
         if ( !tempNode.expr2.expType.isInt() )
@@ -253,9 +252,7 @@ public class SemanticChecker implements ASTVisitor {
     @Override
     public void visit(FuncExprNode tempNode) { // todo 如果表达式为 func 的话，录入的 type 为 function_type
 
-        tempNode.expr.inFunc = tempNode.inFunc ;
-        tempNode.expr.inClass = tempNode.inClass ;
-        tempNode.expr.inClassName = tempNode.inClassName ;
+        deliverSituation(tempNode,tempNode.expr);
 
         FuncDefNode reg_func ;
 
@@ -279,9 +276,7 @@ public class SemanticChecker implements ASTVisitor {
 
         for ( int i = 0 ; i < reg_func.parList.size() ; i++ ){
             ExprNode temp_exp = tempNode.parList.get(i) ;
-            temp_exp.inFunc = tempNode.inFunc ;
-            temp_exp.inClass = tempNode.inClass ;
-            temp_exp.inClassName = tempNode.inClassName ;
+            deliverSituation(tempNode,temp_exp);
             temp_exp.accept(this);
             if ( !tempNode.parList.get(i).expType.equals(temp_exp.expType) ){
                 throw new semanticError("parameter type can't match", tempNode.nodePos);
@@ -294,9 +289,8 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(SelfPreExprNode tempNode) { // todo left_value  instanceof
-        tempNode.exprNode.inClass = tempNode.inClass;
-        tempNode.exprNode.inFunc = tempNode.inFunc ;
-        tempNode.exprNode.inClassName = tempNode.inClassName;
+
+        deliverSituation(tempNode,tempNode.exprNode);
 
         tempNode.exprNode.accept(this);
         if ( !tempNode.exprNode.expType.isInt() ){
@@ -311,9 +305,8 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(SelfSufExprNode tempNode) {
-        tempNode.exprNode.inClass = tempNode.inClass;
-        tempNode.exprNode.inFunc = tempNode.inFunc ;
-        tempNode.exprNode.inClassName = tempNode.inClassName;
+
+        deliverSituation(tempNode,tempNode.exprNode);
 
         tempNode.exprNode.accept(this);
         if ( !tempNode.exprNode.expType.isInt() ){
@@ -328,9 +321,8 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(AssignExprNode tempNode) {
-        tempNode.expr1.inClass = tempNode.expr2.inClass = tempNode.inClass ;
-        tempNode.expr1.inFunc = tempNode.expr2.inFunc = tempNode.inFunc ;
-        tempNode.expr1.inClassName = tempNode.expr2.inClassName = tempNode.inClassName ;
+        deliverSituation(tempNode,tempNode.expr1);
+        deliverSituation(tempNode,tempNode.expr2);
         tempNode.expr1.accept(this);
         tempNode.expr2.accept(this);
         if ( !tempNode.expr1.expType.isAssignable(tempNode.expr2.expType) ){
@@ -346,11 +338,17 @@ public class SemanticChecker implements ASTVisitor {
     @Override
     public void visit(SuiteNode tempNode) {
         currentScope = new Scope(currentScope) ;
+        if( tempNode.paraShot ){
+            tempNode.paraShot = false ;
+            for ( var each : tempNode.inClassFunc.parList ){
+                currentScope.members.put(each.parName,each) ;
+            }
+        }
         for ( var eachStmt : tempNode.allStmt ){
-            eachStmt.inClass = tempNode.inClass;
-            eachStmt.inFunc = tempNode.inFunc;
-            eachStmt.inClassName = tempNode.inClassName;
+
+            deliverSituation(tempNode,eachStmt);
             eachStmt.inLoop = tempNode.inLoop ;
+            eachStmt.retType = tempNode.retType;
             eachStmt.accept(this);
         }
         currentScope = currentScope.parentScope ;
@@ -363,18 +361,14 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(IfStmtNode tempNode) {
-        tempNode.conditionExpr.inClass = tempNode.inClass ;
-        tempNode.conditionExpr.inFunc = tempNode.inFunc ;
-        tempNode.conditionExpr.inClassName = tempNode.inClassName ;
+        deliverSituation(tempNode,tempNode.conditionExpr);
         tempNode.conditionExpr.accept(this);
         if ( !tempNode.conditionExpr.expType.isBool() ){
             throw new semanticError("condition should be bool", tempNode.nodePos);
         }
-        tempNode.trueStmt.inClassName = tempNode.inClassName ;
-        tempNode.trueStmt.inClass = tempNode.inClass ;
-        tempNode.trueStmt.inFunc = tempNode.inFunc ; // todo statement 需要 inLoop
-        tempNode.trueStmt.inLoop = tempNode.inLoop ;
-        if ( !(tempNode.trueStmt instanceof SuiteNode) ){
+        deliverSituation(tempNode,tempNode.trueStmt);
+        tempNode.trueStmt.inLoop = tempNode.inLoop ; // statement 需要 inLoop
+        if ( !(tempNode.trueStmt instanceof SuiteNode) ){ // todo 貌似函数参数不登记在作用域内不行
             currentScope = new Scope(currentScope) ;
             tempNode.trueStmt.accept(this);
             currentScope = currentScope.parentScope ;
@@ -382,9 +376,7 @@ public class SemanticChecker implements ASTVisitor {
             tempNode.trueStmt.accept(this);
         }
         if ( tempNode.falseStmt != null ){
-            tempNode.falseStmt.inClassName = tempNode.inClassName ;
-            tempNode.falseStmt.inClass = tempNode.inClass ;
-            tempNode.falseStmt.inFunc = tempNode.inFunc ;
+            deliverSituation(tempNode,tempNode.falseStmt);
             tempNode.falseStmt.inLoop = tempNode.inLoop ;
             tempNode.falseStmt.accept(this);
         }
@@ -393,34 +385,24 @@ public class SemanticChecker implements ASTVisitor {
     @Override
     public void visit(ForStmtNode tempNode) {
         if ( tempNode.initDef != null ){
-            tempNode.initDef.inClass = tempNode.inClass ;
-            tempNode.initDef.inFunc = tempNode.inFunc;
-            tempNode.initDef.inClassName = tempNode.inClassName ;
+            deliverSituation(tempNode,tempNode.initDef);
             tempNode.initDef.accept(this);
         }else if ( tempNode.initExpr != null ){
-            tempNode.initExpr.inClass = tempNode.inClass ;
-            tempNode.initExpr.inFunc = tempNode.inFunc ;
-            tempNode.initExpr.inClassName = tempNode.inClassName ;
+            deliverSituation(tempNode,tempNode.initExpr);
             tempNode.initExpr.accept(this) ;
         }
         if ( tempNode.conditionExpr != null ){
-            tempNode.conditionExpr.inClass = tempNode.inClass ;
-            tempNode.conditionExpr.inFunc = tempNode.inFunc ;
-            tempNode.conditionExpr.inClassName = tempNode.inClassName ;
+            deliverSituation(tempNode,tempNode.conditionExpr);
             tempNode.conditionExpr.accept(this);
             if ( !tempNode.conditionExpr.expType.isBool() ){
                 throw new semanticError("condition should be bool", tempNode.nodePos);
             }
         }
         if ( tempNode.stepExpr != null ){
-            tempNode.stepExpr.inClass = tempNode.inClass;
-            tempNode.stepExpr.inFunc = tempNode.inFunc;
-            tempNode.stepExpr.inClassName = tempNode.inClassName;
+            deliverSituation(tempNode,tempNode.stepExpr);
             tempNode.stepExpr.accept(this);
         }
-        tempNode.allStmt.inFunc = tempNode.inFunc;
-        tempNode.allStmt.inClass = tempNode.inClass;
-        tempNode.allStmt.inClassName = tempNode.inClassName;
+        deliverSituation(tempNode,tempNode.allStmt);
         tempNode.allStmt.inLoop = true ;
 
         if ( !(tempNode.allStmt instanceof SuiteNode) ){
@@ -435,16 +417,13 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(WhileStmtNode tempNode) {
-        tempNode.condition.inClass = tempNode.inClass ;
-        tempNode.condition.inFunc = tempNode.inFunc ;
-        tempNode.condition.inClassName = tempNode.inClassName ;
+        deliverSituation(tempNode,tempNode.condition);
         tempNode.condition.accept(this);
         if ( !tempNode.condition.expType.isBool() ){
             throw new semanticError("condition should be bool", tempNode.nodePos);
         }
-        tempNode.allStmt.inFunc = tempNode.inFunc;
-        tempNode.allStmt.inClass = tempNode.inClass;
-        tempNode.allStmt.inClassName = tempNode.inClassName;
+
+        deliverSituation(tempNode,tempNode.allStmt);
         tempNode.allStmt.inLoop = true ;
         if (!(tempNode.allStmt instanceof SuiteNode)){
             currentScope = new Scope(currentScope) ;
@@ -477,20 +456,18 @@ public class SemanticChecker implements ASTVisitor {
         if ( tempNode.retExpr == null && !tempNode.retType.isVoid()  ){
             throw new semanticError("return nothing in function", tempNode.nodePos);
         }
-        tempNode.retExpr.inFunc = tempNode.inFunc ;
-        tempNode.retExpr.inClass = tempNode.inClass ;
-        tempNode.retExpr.inClassName = tempNode.inClassName ;
+        deliverSituation(tempNode,tempNode.retExpr);
         tempNode.retExpr.accept(this);
-        if ( !tempNode.retType.equals(tempNode.retExpr.expType) ){
-            throw new semanticError("return type can't match", tempNode.nodePos);
+        if ( tempNode.retType.equals(tempNode.retExpr.expType) || ( tempNode.retExpr.expType.isNull() && !tempNode.retType.isBasic() )){
+            return ;
         }
+        throw new semanticError("return type can't match", tempNode.nodePos);
     }
 
     @Override
     public void visit(IdExprNode tempNode) {
-        tempNode.expr.inClass = tempNode.inClass ;
-        tempNode.expr.inFunc = tempNode.inFunc ;
-        tempNode.expr.inClassName = tempNode.inClassName ;
+
+        deliverSituation(tempNode,tempNode.expr);
         tempNode.expr.accept(this);
 
         if ( tempNode.expr.expType.getDimension() != 0 ){
@@ -540,9 +517,7 @@ public class SemanticChecker implements ASTVisitor {
             throw new semanticError("no such class"+tempNode.varType.getTypeName(), tempNode.nodePos);
         }
         for ( var each : tempNode.exprList ){
-            each.inClass = tempNode.inClass;
-            each.inFunc = tempNode.inFunc;
-            each.inClassName = tempNode.inClassName;
+            deliverSituation(tempNode,each);
             each.accept(this);
             if ( !each.expType.isInt() ){
                 throw new semanticError("index should be integer", tempNode.nodePos);
@@ -553,9 +528,7 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(PureExprStmtNode tempNode) {
-        tempNode.expr.inClass = tempNode.inClass ;
-        tempNode.expr.inFunc = tempNode.inFunc ;
-        tempNode.expr.inClassName = tempNode.inClassName ;
+        deliverSituation(tempNode,tempNode.expr);
         tempNode.expr.accept(this);
     }
 }
