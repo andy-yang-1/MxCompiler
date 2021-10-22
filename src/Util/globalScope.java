@@ -11,6 +11,7 @@ public class globalScope {
     public HashMap<String,SingleDefNode> members ; // variable name -> type
     public HashMap<String, FuncDefNode> funcs ; // function name -> return type
     public HashMap<String, ClassDefNode> registered_class ; // class name -> ClassDefNode
+    public FuncDefNode array_size_func ; // 数组内建函数
     public boolean inFunc , inClass ;
 
     // todo 主要依靠 global scope 来实现代码复用 内部需要很多函数
@@ -57,6 +58,9 @@ public class globalScope {
         s_node.funcRegisteredInClass.put("parseInt",new FuncDefNode(temp_pos,"parseInt",new Type("int",0))) ;
         s_node.funcRegisteredInClass.put("ord",new FuncDefNode(temp_pos,"ord",new Type("int",0))) ;
         (s_node.funcRegisteredInClass.get("ord")).parList.add(new SingleDefNode(temp_pos,"pos",new Type("int",0))) ;
+
+        // array method
+        array_size_func = new FuncDefNode(temp_pos,"size",new Type("int",0)) ;
 
     }
 

@@ -63,7 +63,7 @@ public class Type {
 
     public boolean isString(){ return typeName.equals("string") && dimension == 0 ; }
 
-    public boolean isVoid(){ return typeName.equals("void") && dimension == 0 ; }
+    public boolean isVoid(){ return typeName.equals("void")  ; } // todo 不知道 function return 会不会有 void[] 操作...
 
     public boolean isBasic(){ return isInt() || isBool() ; }
 

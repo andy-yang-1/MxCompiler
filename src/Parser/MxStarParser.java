@@ -1574,10 +1574,10 @@ public class MxStarParser extends Parser {
 		}
 		public TerminalNode SelfPlus() { return getToken(MxStarParser.SelfPlus, 0); }
 		public TerminalNode SelfMinus() { return getToken(MxStarParser.SelfMinus, 0); }
-		public TerminalNode Plus() { return getToken(MxStarParser.Plus, 0); }
-		public TerminalNode Minus() { return getToken(MxStarParser.Minus, 0); }
 		public TerminalNode Not() { return getToken(MxStarParser.Not, 0); }
 		public TerminalNode Tilde() { return getToken(MxStarParser.Tilde, 0); }
+		public TerminalNode Plus() { return getToken(MxStarParser.Plus, 0); }
+		public TerminalNode Minus() { return getToken(MxStarParser.Minus, 0); }
 		public SelfPreExprContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
@@ -1800,15 +1800,6 @@ public class MxStarParser extends Parser {
 				newType();
 				}
 				break;
-			case LeftBracket:
-				{
-				_localctx = new FunctionExprContext(_localctx);
-				_ctx = _localctx;
-				_prevctx = _localctx;
-				setState(199);
-				lambdaFunction();
-				}
-				break;
 			case Plus:
 			case SelfPlus:
 			case Minus:
@@ -1819,7 +1810,7 @@ public class MxStarParser extends Parser {
 				_localctx = new SelfPreExprContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
-				setState(200);
+				setState(199);
 				((SelfPreExprContext)_localctx).op = _input.LT(1);
 				_la = _input.LA(1);
 				if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << Plus) | (1L << SelfPlus) | (1L << Minus) | (1L << SelfMinus) | (1L << Not) | (1L << Tilde))) != 0)) ) {
@@ -1830,8 +1821,17 @@ public class MxStarParser extends Parser {
 					_errHandler.reportMatch(this);
 					consume();
 				}
+				setState(200);
+				expression(13);
+				}
+				break;
+			case LeftBracket:
+				{
+				_localctx = new FunctionExprContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
 				setState(201);
-				expression(3);
+				lambdaFunction();
 				}
 				break;
 			default:
@@ -1855,7 +1855,7 @@ public class MxStarParser extends Parser {
 						((BinaryExprContext)_localctx).expr1 = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(204);
-						if (!(precpred(_ctx, 14))) throw new FailedPredicateException(this, "precpred(_ctx, 14)");
+						if (!(precpred(_ctx, 11))) throw new FailedPredicateException(this, "precpred(_ctx, 11)");
 						setState(205);
 						((BinaryExprContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
@@ -1868,7 +1868,7 @@ public class MxStarParser extends Parser {
 							consume();
 						}
 						setState(206);
-						((BinaryExprContext)_localctx).expr2 = expression(15);
+						((BinaryExprContext)_localctx).expr2 = expression(12);
 						}
 						break;
 					case 2:
@@ -1877,7 +1877,7 @@ public class MxStarParser extends Parser {
 						((BinaryExprContext)_localctx).expr1 = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(207);
-						if (!(precpred(_ctx, 13))) throw new FailedPredicateException(this, "precpred(_ctx, 13)");
+						if (!(precpred(_ctx, 10))) throw new FailedPredicateException(this, "precpred(_ctx, 10)");
 						setState(208);
 						((BinaryExprContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
@@ -1890,7 +1890,7 @@ public class MxStarParser extends Parser {
 							consume();
 						}
 						setState(209);
-						((BinaryExprContext)_localctx).expr2 = expression(14);
+						((BinaryExprContext)_localctx).expr2 = expression(11);
 						}
 						break;
 					case 3:
@@ -1899,7 +1899,7 @@ public class MxStarParser extends Parser {
 						((BinaryExprContext)_localctx).expr1 = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(210);
-						if (!(precpred(_ctx, 12))) throw new FailedPredicateException(this, "precpred(_ctx, 12)");
+						if (!(precpred(_ctx, 9))) throw new FailedPredicateException(this, "precpred(_ctx, 9)");
 						setState(211);
 						((BinaryExprContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
@@ -1912,7 +1912,7 @@ public class MxStarParser extends Parser {
 							consume();
 						}
 						setState(212);
-						((BinaryExprContext)_localctx).expr2 = expression(13);
+						((BinaryExprContext)_localctx).expr2 = expression(10);
 						}
 						break;
 					case 4:
@@ -1921,7 +1921,7 @@ public class MxStarParser extends Parser {
 						((BinaryExprContext)_localctx).expr1 = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(213);
-						if (!(precpred(_ctx, 11))) throw new FailedPredicateException(this, "precpred(_ctx, 11)");
+						if (!(precpred(_ctx, 8))) throw new FailedPredicateException(this, "precpred(_ctx, 8)");
 						setState(214);
 						((BinaryExprContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
@@ -1934,7 +1934,7 @@ public class MxStarParser extends Parser {
 							consume();
 						}
 						setState(215);
-						((BinaryExprContext)_localctx).expr2 = expression(12);
+						((BinaryExprContext)_localctx).expr2 = expression(9);
 						}
 						break;
 					case 5:
@@ -1943,7 +1943,7 @@ public class MxStarParser extends Parser {
 						((BinaryExprContext)_localctx).expr1 = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(216);
-						if (!(precpred(_ctx, 10))) throw new FailedPredicateException(this, "precpred(_ctx, 10)");
+						if (!(precpred(_ctx, 7))) throw new FailedPredicateException(this, "precpred(_ctx, 7)");
 						setState(217);
 						((BinaryExprContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
@@ -1956,7 +1956,7 @@ public class MxStarParser extends Parser {
 							consume();
 						}
 						setState(218);
-						((BinaryExprContext)_localctx).expr2 = expression(11);
+						((BinaryExprContext)_localctx).expr2 = expression(8);
 						}
 						break;
 					case 6:
@@ -1965,11 +1965,11 @@ public class MxStarParser extends Parser {
 						((BinaryExprContext)_localctx).expr1 = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(219);
-						if (!(precpred(_ctx, 9))) throw new FailedPredicateException(this, "precpred(_ctx, 9)");
+						if (!(precpred(_ctx, 6))) throw new FailedPredicateException(this, "precpred(_ctx, 6)");
 						setState(220);
 						((BinaryExprContext)_localctx).op = match(And);
 						setState(221);
-						((BinaryExprContext)_localctx).expr2 = expression(10);
+						((BinaryExprContext)_localctx).expr2 = expression(7);
 						}
 						break;
 					case 7:
@@ -1978,11 +1978,11 @@ public class MxStarParser extends Parser {
 						((BinaryExprContext)_localctx).expr1 = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(222);
-						if (!(precpred(_ctx, 8))) throw new FailedPredicateException(this, "precpred(_ctx, 8)");
+						if (!(precpred(_ctx, 5))) throw new FailedPredicateException(this, "precpred(_ctx, 5)");
 						setState(223);
 						((BinaryExprContext)_localctx).op = match(Caret);
 						setState(224);
-						((BinaryExprContext)_localctx).expr2 = expression(9);
+						((BinaryExprContext)_localctx).expr2 = expression(6);
 						}
 						break;
 					case 8:
@@ -1991,11 +1991,11 @@ public class MxStarParser extends Parser {
 						((BinaryExprContext)_localctx).expr1 = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(225);
-						if (!(precpred(_ctx, 7))) throw new FailedPredicateException(this, "precpred(_ctx, 7)");
+						if (!(precpred(_ctx, 4))) throw new FailedPredicateException(this, "precpred(_ctx, 4)");
 						setState(226);
 						((BinaryExprContext)_localctx).op = match(Or);
 						setState(227);
-						((BinaryExprContext)_localctx).expr2 = expression(8);
+						((BinaryExprContext)_localctx).expr2 = expression(5);
 						}
 						break;
 					case 9:
@@ -2004,11 +2004,11 @@ public class MxStarParser extends Parser {
 						((BinaryExprContext)_localctx).expr1 = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(228);
-						if (!(precpred(_ctx, 6))) throw new FailedPredicateException(this, "precpred(_ctx, 6)");
+						if (!(precpred(_ctx, 3))) throw new FailedPredicateException(this, "precpred(_ctx, 3)");
 						setState(229);
 						((BinaryExprContext)_localctx).op = match(AndAnd);
 						setState(230);
-						((BinaryExprContext)_localctx).expr2 = expression(7);
+						((BinaryExprContext)_localctx).expr2 = expression(4);
 						}
 						break;
 					case 10:
@@ -2017,11 +2017,11 @@ public class MxStarParser extends Parser {
 						((BinaryExprContext)_localctx).expr1 = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(231);
-						if (!(precpred(_ctx, 5))) throw new FailedPredicateException(this, "precpred(_ctx, 5)");
+						if (!(precpred(_ctx, 2))) throw new FailedPredicateException(this, "precpred(_ctx, 2)");
 						setState(232);
 						((BinaryExprContext)_localctx).op = match(OrOr);
 						setState(233);
-						((BinaryExprContext)_localctx).expr2 = expression(6);
+						((BinaryExprContext)_localctx).expr2 = expression(3);
 						}
 						break;
 					case 11:
@@ -2039,52 +2039,52 @@ public class MxStarParser extends Parser {
 						break;
 					case 12:
 						{
-						_localctx = new IndexExprContext(new ExpressionContext(_parentctx, _parentState));
-						((IndexExprContext)_localctx).expr1 = _prevctx;
+						_localctx = new IdExprContext(new ExpressionContext(_parentctx, _parentState));
+						((IdExprContext)_localctx).expr1 = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(237);
 						if (!(precpred(_ctx, 17))) throw new FailedPredicateException(this, "precpred(_ctx, 17)");
 						setState(238);
-						match(LeftBracket);
+						((IdExprContext)_localctx).op = match(Dot);
 						setState(239);
-						((IndexExprContext)_localctx).expr2 = expression(0);
-						setState(240);
-						match(RightBracket);
+						match(Identifier);
 						}
 						break;
 					case 13:
 						{
-						_localctx = new FunctionExprContext(new ExpressionContext(_parentctx, _parentState));
+						_localctx = new IndexExprContext(new ExpressionContext(_parentctx, _parentState));
+						((IndexExprContext)_localctx).expr1 = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
-						setState(242);
+						setState(240);
 						if (!(precpred(_ctx, 16))) throw new FailedPredicateException(this, "precpred(_ctx, 16)");
+						setState(241);
+						match(LeftBracket);
+						setState(242);
+						((IndexExprContext)_localctx).expr2 = expression(0);
 						setState(243);
-						match(LeftParen);
-						setState(245);
-						_errHandler.sync(this);
-						_la = _input.LA(1);
-						if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << True) | (1L << False) | (1L << This) | (1L << New) | (1L << Null) | (1L << StringContent) | (1L << LeftParen) | (1L << LeftBracket) | (1L << Plus) | (1L << SelfPlus) | (1L << Minus) | (1L << SelfMinus) | (1L << Not) | (1L << Tilde) | (1L << Identifier) | (1L << DecimalInteger))) != 0)) {
-							{
-							setState(244);
-							expressionList();
-							}
-						}
-
-						setState(247);
-						match(RightParen);
+						match(RightBracket);
 						}
 						break;
 					case 14:
 						{
-						_localctx = new IdExprContext(new ExpressionContext(_parentctx, _parentState));
-						((IdExprContext)_localctx).expr1 = _prevctx;
+						_localctx = new FunctionExprContext(new ExpressionContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
+						setState(245);
+						if (!(precpred(_ctx, 15))) throw new FailedPredicateException(this, "precpred(_ctx, 15)");
+						setState(246);
+						match(LeftParen);
 						setState(248);
-						if (!(precpred(_ctx, 4))) throw new FailedPredicateException(this, "precpred(_ctx, 4)");
-						setState(249);
-						((IdExprContext)_localctx).op = match(Dot);
+						_errHandler.sync(this);
+						_la = _input.LA(1);
+						if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << True) | (1L << False) | (1L << This) | (1L << New) | (1L << Null) | (1L << StringContent) | (1L << LeftParen) | (1L << LeftBracket) | (1L << Plus) | (1L << SelfPlus) | (1L << Minus) | (1L << SelfMinus) | (1L << Not) | (1L << Tilde) | (1L << Identifier) | (1L << DecimalInteger))) != 0)) {
+							{
+							setState(247);
+							expressionList();
+							}
+						}
+
 						setState(250);
-						match(Identifier);
+						match(RightParen);
 						}
 						break;
 					case 15:
@@ -2092,7 +2092,7 @@ public class MxStarParser extends Parser {
 						_localctx = new SelfSufExprContext(new ExpressionContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(251);
-						if (!(precpred(_ctx, 2))) throw new FailedPredicateException(this, "precpred(_ctx, 2)");
+						if (!(precpred(_ctx, 14))) throw new FailedPredicateException(this, "precpred(_ctx, 14)");
 						setState(252);
 						((SelfSufExprContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
@@ -2688,25 +2688,25 @@ public class MxStarParser extends Parser {
 	private boolean expression_sempred(ExpressionContext _localctx, int predIndex) {
 		switch (predIndex) {
 		case 0:
-			return precpred(_ctx, 14);
-		case 1:
-			return precpred(_ctx, 13);
-		case 2:
-			return precpred(_ctx, 12);
-		case 3:
 			return precpred(_ctx, 11);
-		case 4:
+		case 1:
 			return precpred(_ctx, 10);
-		case 5:
+		case 2:
 			return precpred(_ctx, 9);
-		case 6:
+		case 3:
 			return precpred(_ctx, 8);
-		case 7:
+		case 4:
 			return precpred(_ctx, 7);
-		case 8:
+		case 5:
 			return precpred(_ctx, 6);
-		case 9:
+		case 6:
 			return precpred(_ctx, 5);
+		case 7:
+			return precpred(_ctx, 4);
+		case 8:
+			return precpred(_ctx, 3);
+		case 9:
+			return precpred(_ctx, 2);
 		case 10:
 			return precpred(_ctx, 1);
 		case 11:
@@ -2714,9 +2714,9 @@ public class MxStarParser extends Parser {
 		case 12:
 			return precpred(_ctx, 16);
 		case 13:
-			return precpred(_ctx, 4);
+			return precpred(_ctx, 15);
 		case 14:
-			return precpred(_ctx, 2);
+			return precpred(_ctx, 14);
 		}
 		return true;
 	}
@@ -2740,7 +2740,7 @@ public class MxStarParser extends Parser {
 		"\3\21\3\21\5\21\u00cd\n\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21"+
 		"\3\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21"+
 		"\3\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21\3\21"+
-		"\3\21\3\21\3\21\3\21\5\21\u00f8\n\21\3\21\3\21\3\21\3\21\3\21\3\21\7\21"+
+		"\3\21\3\21\3\21\3\21\3\21\3\21\3\21\5\21\u00fb\n\21\3\21\3\21\3\21\7\21"+
 		"\u0100\n\21\f\21\16\21\u0103\13\21\3\22\3\22\3\22\7\22\u0108\n\22\f\22"+
 		"\16\22\u010b\13\22\3\23\3\23\3\23\3\23\3\23\7\23\u0112\n\23\f\23\16\23"+
 		"\u0115\13\23\3\23\3\23\6\23\u0119\n\23\r\23\16\23\u011a\3\23\3\23\3\23"+
@@ -2797,27 +2797,27 @@ public class MxStarParser extends Parser {
 		"\u00a1\3\2\2\2\u00c3\u00a7\3\2\2\2\u00c3\u00b6\3\2\2\2\u00c3\u00b8\3\2"+
 		"\2\2\u00c3\u00ba\3\2\2\2\u00c3\u00bf\3\2\2\2\u00c3\u00c2\3\2\2\2\u00c4"+
 		"\37\3\2\2\2\u00c5\u00c6\b\21\1\2\u00c6\u00cd\5&\24\2\u00c7\u00c8\7\22"+
-		"\2\2\u00c8\u00cd\5$\23\2\u00c9\u00cd\5\f\7\2\u00ca\u00cb\t\3\2\2\u00cb"+
-		"\u00cd\5 \21\5\u00cc\u00c5\3\2\2\2\u00cc\u00c7\3\2\2\2\u00cc\u00c9\3\2"+
-		"\2\2\u00cc\u00ca\3\2\2\2\u00cd\u0101\3\2\2\2\u00ce\u00cf\f\20\2\2\u00cf"+
-		"\u00d0\t\4\2\2\u00d0\u0100\5 \21\21\u00d1\u00d2\f\17\2\2\u00d2\u00d3\t"+
-		"\5\2\2\u00d3\u0100\5 \21\20\u00d4\u00d5\f\16\2\2\u00d5\u00d6\t\6\2\2\u00d6"+
-		"\u0100\5 \21\17\u00d7\u00d8\f\r\2\2\u00d8\u00d9\t\7\2\2\u00d9\u0100\5"+
-		" \21\16\u00da\u00db\f\f\2\2\u00db\u00dc\t\b\2\2\u00dc\u0100\5 \21\r\u00dd"+
-		"\u00de\f\13\2\2\u00de\u00df\7*\2\2\u00df\u0100\5 \21\f\u00e0\u00e1\f\n"+
-		"\2\2\u00e1\u00e2\7.\2\2\u00e2\u0100\5 \21\13\u00e3\u00e4\f\t\2\2\u00e4"+
-		"\u00e5\7+\2\2\u00e5\u0100\5 \21\n\u00e6\u00e7\f\b\2\2\u00e7\u00e8\7,\2"+
-		"\2\u00e8\u0100\5 \21\t\u00e9\u00ea\f\7\2\2\u00ea\u00eb\7-\2\2\u00eb\u0100"+
-		"\5 \21\b\u00ec\u00ed\f\3\2\2\u00ed\u00ee\7\65\2\2\u00ee\u0100\5 \21\3"+
-		"\u00ef\u00f0\f\23\2\2\u00f0\u00f1\7\31\2\2\u00f1\u00f2\5 \21\2\u00f2\u00f3"+
-		"\7\32\2\2\u00f3\u0100\3\2\2\2\u00f4\u00f5\f\22\2\2\u00f5\u00f7\7\27\2"+
-		"\2\u00f6\u00f8\5\"\22\2\u00f7\u00f6\3\2\2\2\u00f7\u00f8\3\2\2\2\u00f8"+
-		"\u00f9\3\2\2\2\u00f9\u0100\7\30\2\2\u00fa\u00fb\f\6\2\2\u00fb\u00fc\7"+
-		"\26\2\2\u00fc\u0100\7:\2\2\u00fd\u00fe\f\4\2\2\u00fe\u0100\t\t\2\2\u00ff"+
+		"\2\2\u00c8\u00cd\5$\23\2\u00c9\u00ca\t\3\2\2\u00ca\u00cd\5 \21\17\u00cb"+
+		"\u00cd\5\f\7\2\u00cc\u00c5\3\2\2\2\u00cc\u00c7\3\2\2\2\u00cc\u00c9\3\2"+
+		"\2\2\u00cc\u00cb\3\2\2\2\u00cd\u0101\3\2\2\2\u00ce\u00cf\f\r\2\2\u00cf"+
+		"\u00d0\t\4\2\2\u00d0\u0100\5 \21\16\u00d1\u00d2\f\f\2\2\u00d2\u00d3\t"+
+		"\5\2\2\u00d3\u0100\5 \21\r\u00d4\u00d5\f\13\2\2\u00d5\u00d6\t\6\2\2\u00d6"+
+		"\u0100\5 \21\f\u00d7\u00d8\f\n\2\2\u00d8\u00d9\t\7\2\2\u00d9\u0100\5 "+
+		"\21\13\u00da\u00db\f\t\2\2\u00db\u00dc\t\b\2\2\u00dc\u0100\5 \21\n\u00dd"+
+		"\u00de\f\b\2\2\u00de\u00df\7*\2\2\u00df\u0100\5 \21\t\u00e0\u00e1\f\7"+
+		"\2\2\u00e1\u00e2\7.\2\2\u00e2\u0100\5 \21\b\u00e3\u00e4\f\6\2\2\u00e4"+
+		"\u00e5\7+\2\2\u00e5\u0100\5 \21\7\u00e6\u00e7\f\5\2\2\u00e7\u00e8\7,\2"+
+		"\2\u00e8\u0100\5 \21\6\u00e9\u00ea\f\4\2\2\u00ea\u00eb\7-\2\2\u00eb\u0100"+
+		"\5 \21\5\u00ec\u00ed\f\3\2\2\u00ed\u00ee\7\65\2\2\u00ee\u0100\5 \21\3"+
+		"\u00ef\u00f0\f\23\2\2\u00f0\u00f1\7\26\2\2\u00f1\u0100\7:\2\2\u00f2\u00f3"+
+		"\f\22\2\2\u00f3\u00f4\7\31\2\2\u00f4\u00f5\5 \21\2\u00f5\u00f6\7\32\2"+
+		"\2\u00f6\u0100\3\2\2\2\u00f7\u00f8\f\21\2\2\u00f8\u00fa\7\27\2\2\u00f9"+
+		"\u00fb\5\"\22\2\u00fa\u00f9\3\2\2\2\u00fa\u00fb\3\2\2\2\u00fb\u00fc\3"+
+		"\2\2\2\u00fc\u0100\7\30\2\2\u00fd\u00fe\f\20\2\2\u00fe\u0100\t\t\2\2\u00ff"+
 		"\u00ce\3\2\2\2\u00ff\u00d1\3\2\2\2\u00ff\u00d4\3\2\2\2\u00ff\u00d7\3\2"+
 		"\2\2\u00ff\u00da\3\2\2\2\u00ff\u00dd\3\2\2\2\u00ff\u00e0\3\2\2\2\u00ff"+
 		"\u00e3\3\2\2\2\u00ff\u00e6\3\2\2\2\u00ff\u00e9\3\2\2\2\u00ff\u00ec\3\2"+
-		"\2\2\u00ff\u00ef\3\2\2\2\u00ff\u00f4\3\2\2\2\u00ff\u00fa\3\2\2\2\u00ff"+
+		"\2\2\u00ff\u00ef\3\2\2\2\u00ff\u00f2\3\2\2\2\u00ff\u00f7\3\2\2\2\u00ff"+
 		"\u00fd\3\2\2\2\u0100\u0103\3\2\2\2\u0101\u00ff\3\2\2\2\u0101\u0102\3\2"+
 		"\2\2\u0102!\3\2\2\2\u0103\u0101\3\2\2\2\u0104\u0109\5 \21\2\u0105\u0106"+
 		"\7\64\2\2\u0106\u0108\5 \21\2\u0107\u0105\3\2\2\2\u0108\u010b\3\2\2\2"+
@@ -2850,7 +2850,7 @@ public class MxStarParser extends Parser {
 		"\u015a\7:\2\2\u0159\u0152\3\2\2\2\u0159\u0156\3\2\2\2\u0159\u0157\3\2"+
 		"\2\2\u0159\u0158\3\2\2\2\u015a\'\3\2\2\2\u015b\u015c\t\n\2\2\u015c)\3"+
 		"\2\2\2%-\64<DJTWamox\u0082\u008b\u0094\u009f\u00aa\u00ae\u00b2\u00bc\u00c3"+
-		"\u00cc\u00f7\u00ff\u0101\u0109\u0113\u011a\u0122\u012d\u0134\u013e\u0145"+
+		"\u00cc\u00fa\u00ff\u0101\u0109\u0113\u011a\u0122\u012d\u0134\u013e\u0145"+
 		"\u014b\u0150\u0159";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());

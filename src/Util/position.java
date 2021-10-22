@@ -33,5 +33,13 @@ public class position {
         return column;
     }
 
+    // greater 意味着在更后方
+    public boolean isGreater( position other ){
+        if ( row != other.row ){
+            return row > other.row ;
+        }
+        return column > other.column ;
+    }
+
     public String toString() { return row + "," + column; }
 }

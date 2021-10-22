@@ -68,8 +68,11 @@ stmt
 expression
     : primary                                                       #atomExpr
     | New newType                                                   #newExpr
+    | expr1=expression op = '.' Identifier                                #idExpr
     | expr1=expression '[' expr2=expression ']'                                 #indexExpr
     | expression '(' expressionList? ')'                            #functionExpr
+    | expression op = ('++'|'--')                                   #selfSufExpr
+    | <assoc=right> op = ('++'|'--'|'!'|'~'|'+'|'-') expression     #selfPreExpr
     | lambdaFunction                                                #functionExpr
     | expr1=expression op = ('*' | '/' | '%') expr2=expression                  #binaryExpr
     | expr1=expression op = ('+' | '-') expr2=expression                        #binaryExpr
@@ -81,9 +84,6 @@ expression
     | expr1=expression op = '|' expr2=expression                                #binaryExpr
     | expr1=expression op = '&&' expr2=expression                               #binaryExpr
     | expr1=expression op = '||' expr2=expression                               #binaryExpr
-    | expr1=expression op = '.' Identifier                                #idExpr
-    | <assoc=right> op = ('++'|'--'|'+'|'-'|'!'|'~') expression     #selfPreExpr
-    | expression op = ('++'|'--')                                   #selfSufExpr
     | <assoc=right> expr1=expression '=' expr2=expression                       #assignExpr
     ;
 
