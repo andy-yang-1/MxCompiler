@@ -67,6 +67,9 @@ public class SymbolCollector implements ASTVisitor {
             if ( Type.isConservedWord(eachVar.parName) ){
                 throw new semanticError("use conserved word as variable name in class ", tempNode.nodePos);
             }
+            if ( eachVar.parType.isVoid() ){
+                throw new semanticError("variable type can't be void", tempNode.nodePos);
+            }
             tempNode.varRegisteredInClass.put(eachVar.parName,eachVar) ;
         }
 
@@ -108,6 +111,14 @@ public class SymbolCollector implements ASTVisitor {
         if ( !gScope.registered_class.containsKey(tempNode.retType.getTypeName()) ){
             throw new semanticError("no such type ",tempNode.nodePos) ;
         }
+        for ( var each : tempNode.parList ){
+            if ( each.expAns != null ){
+                throw new semanticError("parameter can't be followed with expression", tempNode.nodePos);
+            }
+            if ( !gScope.registered_class.containsKey(each.parType.getTypeName()) ){
+                throw new semanticError("no such type for parameter", tempNode.nodePos);
+            }
+        }
         tempNode.inClass = false ;
         gScope.funcs.put(tempNode.funcName,tempNode) ;
     }
@@ -121,6 +132,10 @@ public class SymbolCollector implements ASTVisitor {
     public void visit(VarDefStmtNode tempNode) {
 
         // todo semantic 里面要检查变量 exp 合法性
+
+        if ( tempNode.varType.isVoid() ){
+            throw new semanticError("variable type can't be void", tempNode.nodePos);
+        }
 
         if (!gScope.registered_class.containsKey(tempNode.varType.getTypeName())){
             throw new semanticError("no such type ", tempNode.nodePos);
@@ -230,6 +245,11 @@ public class SymbolCollector implements ASTVisitor {
 
     @Override
     public void visit(NormalNewNode tempNode) {
+
+    }
+
+    @Override
+    public void visit(PureExprStmtNode tempNode) {
 
     }
 }

@@ -81,7 +81,7 @@ expression
     | expr1=expression op = '|' expr2=expression                                #binaryExpr
     | expr1=expression op = '&&' expr2=expression                               #binaryExpr
     | expr1=expression op = '||' expr2=expression                               #binaryExpr
-    | expr1=expression op = '.' expr2=expression                                #binaryExpr
+    | expr1=expression op = '.' Identifier                                #idExpr
     | <assoc=right> op = ('++'|'--'|'+'|'-'|'!'|'~') expression     #selfPreExpr
     | expression op = ('++'|'--')                                   #selfSufExpr
     | <assoc=right> expr1=expression '=' expr2=expression                       #assignExpr

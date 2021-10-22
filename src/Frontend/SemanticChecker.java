@@ -29,6 +29,8 @@ public class SemanticChecker implements ASTVisitor {
         return exp1.expType.equals(exp2.expType) ;
     }
 
+    // todo 还没有在函数里查 return 的存在
+
     public static void deliverSituation(ASTNode a , ASTNode b){ // a -> b
         b.inClass = a.inClass ;
         b.inFunc = a.inFunc ;
@@ -43,6 +45,9 @@ public class SemanticChecker implements ASTVisitor {
         }
         if ( !gScope.getFuncType("main").equals(new Type("int",0)) ){
             throw new semanticError("main return wrong type", tempNode.nodePos);
+        }
+        if ( gScope.funcs.get("main").parList.size() > 0 ){
+            throw new semanticError("main shouldn't have parameter", tempNode.nodePos);
         }
         for( var each : tempNode.unitList ){
             if (each instanceof VarDefStmtNode){ // 特判 gScope 中定义是否合法
@@ -91,7 +96,8 @@ public class SemanticChecker implements ASTVisitor {
     @Override
     public void visit(ConstructorDefNode tempNode) { // todo 注意 有参数的未定义
         tempNode.allStmt.inClass = true ;
-        tempNode.allStmt.inFunc = true ;
+        tempNode.allStmt.inFunc = false ;
+        tempNode.allStmt.inClassName = tempNode.className;
         tempNode.allStmt.accept(this);
     }
 
@@ -101,15 +107,16 @@ public class SemanticChecker implements ASTVisitor {
         if ( !gScope.containClass(tempNode.retType.typeName) ){
             throw new semanticError("no such class",tempNode.nodePos) ;
         }
-        for ( var each : tempNode.parList ){
-            each.accept(this);
-        }
         tempNode.allStmt.inFunc = true ;
         tempNode.allStmt.inClass = tempNode.inClass;
+        tempNode.allStmt.inClassName = tempNode.inClassName;
         tempNode.allStmt.retType = tempNode.retType; // todo 每一个 stmt 都有可能是 return statement
         tempNode.allStmt.inClassFunc = tempNode ;
-        tempNode.paraShot = true ; // 要求 suite 将参数射入 scope 内
+        tempNode.allStmt.paraShot = true ; // 要求 suite 将参数射入 scope 内
         tempNode.allStmt.accept(this); // todo 去到 suite 内再判等
+        if ( !tempNode.isReturned && !tempNode.retType.isVoid() && !tempNode.funcName.equals("main") ){
+            throw new semanticError("function hasn't been returned", tempNode.nodePos);
+        }
     //    currentScope = currentScope.parentScope ; // 离开 scope
     }
 
@@ -128,7 +135,7 @@ public class SemanticChecker implements ASTVisitor {
                 throw new semanticError("member type can't match ",tempNode.nodePos) ;
             }
         }
-        if ( currentScope.containVar(tempNode.parName)  ){
+        if ( currentScope.containVar(tempNode.parName) || gScope.containFunc(tempNode.parName) || gScope.containClass(tempNode.parName)  ){
             throw new semanticError("redefinition of member ", tempNode.nodePos);
         }
         currentScope.members.put(tempNode.parName,tempNode) ;
@@ -136,6 +143,9 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(VarDefStmtNode tempNode) {
+        if ( tempNode.varType.isVoid() ){
+            throw new semanticError("variable type can't be void", tempNode.nodePos);
+        }
         for ( var each : tempNode.singleDefList ){
             deliverSituation(tempNode,each);
             each.accept(this);
@@ -171,6 +181,7 @@ public class SemanticChecker implements ASTVisitor {
             case identifierType :
                 if ( !currentScope.ContainVarAllSearch(tempNode.primaryStr) && !gScope.containVar(tempNode.primaryStr) ){
                     // todo 小心 function 内部的 para
+                    // todo identifierType 还有可能是个函数??
                     throw new semanticError("variable not defined", tempNode.nodePos);
                 }else{
                     tempNode.expType = currentScope.ContainVarAllSearch(tempNode.primaryStr) ? currentScope.GetTypeAllSearch(tempNode.primaryStr) : gScope.getVarType(tempNode.primaryStr) ;
@@ -226,6 +237,7 @@ public class SemanticChecker implements ASTVisitor {
             }else{
                 tempNode.expType = BoolType ;
             }
+            return ;
         }
         throw new semanticError("can't handle the situation " + op, tempNode.nodePos) ;
     }
@@ -258,7 +270,8 @@ public class SemanticChecker implements ASTVisitor {
 
         if ( tempNode.expr instanceof IdExprNode ){
             tempNode.expr.accept(this);
-            reg_func = tempNode.func_call ;
+            tempNode.func_call = tempNode.expr.func_call ;
+            reg_func = tempNode.expr.func_call ;
             if ( reg_func == null ){
                 throw new semanticError("null func in func_cal", tempNode.nodePos);
             }
@@ -293,6 +306,9 @@ public class SemanticChecker implements ASTVisitor {
         deliverSituation(tempNode,tempNode.exprNode);
 
         tempNode.exprNode.accept(this);
+        if ( !(tempNode.exprNode instanceof PrimaryNode) ){
+            throw new semanticError("only primary node can be ++/--", tempNode.nodePos);
+        }
         if ( !tempNode.exprNode.expType.isInt() ){
             throw new semanticError("only int can be ++/--",tempNode.nodePos) ;
         }
@@ -309,6 +325,9 @@ public class SemanticChecker implements ASTVisitor {
         deliverSituation(tempNode,tempNode.exprNode);
 
         tempNode.exprNode.accept(this);
+        if ( !(tempNode.exprNode instanceof PrimaryNode) ){ // only accessible by primary expression
+            throw new semanticError("only primary expression can be ++/--", tempNode.nodePos);
+        }
         if ( !tempNode.exprNode.expType.isInt() ){
             throw new semanticError("only int can be ++/--",tempNode.nodePos) ;
         }
@@ -453,7 +472,10 @@ public class SemanticChecker implements ASTVisitor {
         if ( !tempNode.inFunc ){
             throw new semanticError("can't return outside function", tempNode.nodePos);
         }
-        if ( tempNode.retExpr == null && !tempNode.retType.isVoid()  ){
+        tempNode.inClassFunc.isReturned = true ;
+        if ( tempNode.retExpr == null ){
+            if ( tempNode.retType.isVoid() )
+                return ;
             throw new semanticError("return nothing in function", tempNode.nodePos);
         }
         deliverSituation(tempNode,tempNode.retExpr);
@@ -473,6 +495,7 @@ public class SemanticChecker implements ASTVisitor {
         if ( tempNode.expr.expType.getDimension() != 0 ){
             throw new semanticError("member access can't be an array", tempNode.nodePos);
         }
+        tempNode.expType = tempNode.expr.expType ;
         String targetClassName = tempNode.expType.getTypeName() ;
         if ( !gScope.containClass(targetClassName) ){
             throw new semanticError("member access: no such class", tempNode.nodePos);
@@ -482,6 +505,7 @@ public class SemanticChecker implements ASTVisitor {
 
         if ( gScope.hasSuchMember(targetClassName, tempNode.ID) ){
             tempNode.expType = gScope.getMemberType(targetClassName, tempNode.ID);
+            tempNode.isLeftValue = true ;
             return ;
         }
 

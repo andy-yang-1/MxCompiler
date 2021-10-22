@@ -20,7 +20,7 @@ public class Type {
 
     public Type(MxStarParser.TypeContext ctx){
         typeName = ctx.basicType().getText() ;
-        String temp_str = ctx.basicType().getText() ;
+        String temp_str = ctx.getText() ;
         dimension = 0 ;
         for ( int i = 0 ; i < temp_str.length() ; i++ ){
             if ( temp_str.charAt(i) == '[' ){
@@ -38,6 +38,7 @@ public class Type {
     }
 
     public String getTypeName(){
+
         return typeName ;
     }
 

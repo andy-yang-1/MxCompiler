@@ -18,6 +18,8 @@ public class FuncDefNode extends UnitNode {
     public ArrayList<SingleDefNode> parList ;
     public SuiteNode allStmt ;
 
+    public boolean isReturned = false ;
+
     public FuncDefNode(position temp_pos, String temp_name , Type temp_type) {
         super(temp_pos);
         funcName = new String(temp_name) ;
