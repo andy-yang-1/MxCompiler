@@ -73,7 +73,6 @@ expression
     | expression '(' expressionList? ')'                            #functionExpr
     | expression op = ('++'|'--')                                   #selfSufExpr
     | <assoc=right> op = ('++'|'--'|'!'|'~'|'+'|'-') expression     #selfPreExpr
-    | lambdaFunction                                                #functionExpr
     | expr1=expression op = ('*' | '/' | '%') expr2=expression                  #binaryExpr
     | expr1=expression op = ('+' | '-') expr2=expression                        #binaryExpr
     | expr1=expression op = ('<<' | '>>') expr2=expression                      #binaryExpr
@@ -99,6 +98,7 @@ newType
 
 primary
     : '(' expression ')'
+    | lambdaFunction
     | This
     | literal
     | Identifier

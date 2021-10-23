@@ -2,6 +2,7 @@ package ASTNodeType.ExprNodeType;
 
 import ASTNodeType.ASTNode;
 import ASTNodeType.ASTVisitor;
+import ASTNodeType.DefNodeType.FuncDefNode;
 import Util.position;
 
 import java.util.ArrayList;

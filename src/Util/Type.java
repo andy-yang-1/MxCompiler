@@ -67,6 +67,8 @@ public class Type {
 
     public boolean isBasic(){ return isInt() || isBool() ; }
 
+    public boolean isLambda(){ return typeName.equals("LAMBDA") ; }
+
     public boolean isAssignable( Type other ){
         if ( this.equals(other) ) return true ;
         if ( other.isNull() ){
@@ -91,7 +93,8 @@ public class Type {
         literalTrue ,
         literalFalse ,
         literalNull ,
-        literalString
+        literalString ,
+        lambdaType
     }
 }
 

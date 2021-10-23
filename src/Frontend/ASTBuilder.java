@@ -79,8 +79,15 @@ public class ASTBuilder extends MxStarBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitLambdaFunction(MxStarParser.LambdaFunctionContext ctx) {
-        // todo
-        return null;
+        FunctionNewNode temp_node = new FunctionNewNode(new position(ctx)) ;
+        temp_node.func_node = new FuncDefNode(new position(ctx),"anonymous",new Type("LAMBDA",0)) ;
+        if ( ctx.functionParaList() != null ){
+            for ( var each : ctx.functionParaList().paraVarDef() ){
+                temp_node.func_node.parList.add(new SingleDefNode(new position(each),each.Identifier().getText(),new Type(each.type()))) ;
+            }
+        }
+        temp_node.func_node.allStmt = (SuiteNode) visit(ctx.suite()) ;
+        return temp_node;
     }
 
     @Override
@@ -207,6 +214,9 @@ public class ASTBuilder extends MxStarBaseVisitor<ASTNode> {
         if (ctx.primary().expression() != null) {
             temp_node.exp = (ExprNode) visit(ctx.primary().expression());
             temp_node.primaryType = Type.elementCategory.exprType;
+        }else if (ctx.primary().lambdaFunction() != null){
+            temp_node.lambdaNode = (FunctionNewNode) visit(ctx.primary().lambdaFunction()) ;
+            temp_node.primaryType = Type.elementCategory.lambdaType ;
         } else if (ctx.primary().This() != null) {
             temp_node.primaryType = Type.elementCategory.thisType;
             temp_node.primaryStr = ctx.primary().This().getText();
@@ -268,9 +278,10 @@ public class ASTBuilder extends MxStarBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitFunctionNew(MxStarParser.FunctionNewContext ctx) {
-        FunctionNewNode temp_node = new FunctionNewNode(new position(ctx));
-        temp_node.func_node = (FuncDefNode) visit(ctx.functionDef());
-        return temp_node;
+        // todo 貌似与 lambda 功能重复了...此处删掉
+//        FunctionNewNode temp_node = new FunctionNewNode(new position(ctx));
+//        temp_node.func_node = (FuncDefNode) visit(ctx.functionDef());
+        return null;
     }
 
     @Override
