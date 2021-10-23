@@ -96,7 +96,7 @@ public class SemanticChecker implements ASTVisitor {
     @Override
     public void visit(ConstructorDefNode tempNode) { // todo 注意 有参数的未定义
         tempNode.allStmt.inClass = true;
-        tempNode.allStmt.inFunc = false;
+        tempNode.allStmt.inFunc = false ;
         tempNode.allStmt.inClassName = tempNode.className;
         tempNode.allStmt.accept(this);
     }
@@ -135,7 +135,7 @@ public class SemanticChecker implements ASTVisitor {
                 throw new semanticError("member type can't match ", tempNode.nodePos);
             }
         }
-        if (currentScope.containVar(tempNode.parName) || gScope.containFunc(tempNode.parName) || gScope.containClass(tempNode.parName)) {
+        if ( (currentScope != null && currentScope.containVar(tempNode.parName)) || gScope.containFunc(tempNode.parName) || gScope.containClass(tempNode.parName)) {
             throw new semanticError("redefinition of member ", tempNode.nodePos);
         }
         currentScope.members.put(tempNode.parName, tempNode);
@@ -191,14 +191,14 @@ public class SemanticChecker implements ASTVisitor {
                 }
                 break;
             case identifierType:
-                if (!currentScope.ContainVarAllSearch(tempNode.primaryStr)) {
-                    if (gScope.containVar(tempNode.primaryStr) && !gScope.members.get(tempNode.primaryStr).nodePos.isGreater(tempNode.nodePos)) { // back reference
-                        tempNode.expType = gScope.getVarType(tempNode.primaryStr);
-                        tempNode.isLeftValue = true;
-                    } else if ( tempNode.inClass && gScope.hasSuchMember(tempNode.inClassName, tempNode.primaryStr) ) {
+                if ( currentScope == null || !currentScope.ContainVarAllSearch(tempNode.primaryStr)) {
+                    if (tempNode.inClass && gScope.hasSuchMember(tempNode.inClassName, tempNode.primaryStr)) { // back reference
                         tempNode.expType = gScope.getMemberType(tempNode.inClassName, tempNode.primaryStr) ;
+                        tempNode.isLeftValue = true;
+                    } else if ( gScope.containVar(tempNode.primaryStr) && !gScope.members.get(tempNode.primaryStr).nodePos.isGreater(tempNode.nodePos) ) { // todo 优先级为 current > class > global
+                        tempNode.expType = gScope.getVarType(tempNode.primaryStr);
                         tempNode.isLeftValue = true ;
-                    } else {
+                    } else { // tempNode.inClass && gScope.hasSuchMember(tempNode.inClassName, tempNode.primaryStr)
                         throw new semanticError("variable not defined", tempNode.nodePos);
                     }
                 } else {
@@ -302,10 +302,15 @@ public class SemanticChecker implements ASTVisitor {
             }
         } else {
             String func_name = ((PrimaryNode) tempNode.expr).primaryStr;
-            if (!gScope.containFunc(func_name)) {
-                throw new semanticError("no such function", tempNode.nodePos);
+            if (!gScope.containFunc(func_name)  ) {
+                if (tempNode.inClass && gScope.hasSuchMethod(tempNode.inClassName, func_name)) {
+                    reg_func = gScope.registered_class.get(tempNode.inClassName).funcRegisteredInClass.get(func_name) ;
+                }else{
+                    throw new semanticError("no such function", tempNode.nodePos);
+                }
+            }else{
+                reg_func = gScope.funcs.get(func_name);
             }
-            reg_func = gScope.funcs.get(func_name);
         }
 
         if (reg_func.parList.size() != tempNode.parList.size()) {
@@ -342,7 +347,7 @@ public class SemanticChecker implements ASTVisitor {
             }
         }
 
-        if ( tempNode.op.equals("~") ){
+        if ( tempNode.op.equals("~") || tempNode.op.equals("-") || tempNode.op.equals("+") ){
             if ( tempNode.exprNode.expType.isInt() ){
                 tempNode.expType = tempNode.exprNode.expType ;
                 tempNode.isLeftValue = false ;
@@ -352,8 +357,8 @@ public class SemanticChecker implements ASTVisitor {
             }
         }
 
-        if (!(tempNode.exprNode instanceof PrimaryNode) && !(tempNode.exprNode instanceof IdExprNode)) {
-            throw new semanticError("only primary node can be ++/--", tempNode.nodePos);
+        if (!(tempNode.exprNode instanceof PrimaryNode) && !(tempNode.exprNode instanceof IdExprNode) && !(tempNode.exprNode instanceof IndexExprNode) ) {
+            throw new semanticError("only primary id and index expression node can be ++/--", tempNode.nodePos);
         }
         if (!tempNode.exprNode.expType.isInt()) {
             throw new semanticError("only int can be ++/--", tempNode.nodePos);
@@ -371,8 +376,8 @@ public class SemanticChecker implements ASTVisitor {
         deliverSituation(tempNode, tempNode.exprNode);
 
         tempNode.exprNode.accept(this);
-        if (!(tempNode.exprNode instanceof PrimaryNode) && !(tempNode.exprNode instanceof IdExprNode)) { // only accessible by primary expression
-            throw new semanticError("only primary expression can be ++/--", tempNode.nodePos);
+        if (!(tempNode.exprNode instanceof PrimaryNode) && !(tempNode.exprNode instanceof IdExprNode) && !(tempNode.exprNode instanceof IndexExprNode) ) { // only accessible by primary expression
+            throw new semanticError("only primary , id and index expression can be ++/--", tempNode.nodePos);
         }
         if (!tempNode.exprNode.expType.isInt()) {
             throw new semanticError("only int can be ++/--", tempNode.nodePos);
@@ -470,6 +475,7 @@ public class SemanticChecker implements ASTVisitor {
             tempNode.stepExpr.accept(this);
         }
         deliverSituation(tempNode, tempNode.allStmt);
+        tempNode.allStmt.retType = tempNode.retType;
         tempNode.allStmt.inLoop = true;
 
         if (!(tempNode.allStmt instanceof SuiteNode)) {
@@ -492,6 +498,7 @@ public class SemanticChecker implements ASTVisitor {
 
         deliverSituation(tempNode, tempNode.allStmt);
         tempNode.allStmt.inLoop = true;
+        tempNode.allStmt.retType = tempNode.retType;
         if (!(tempNode.allStmt instanceof SuiteNode)) {
             currentScope = new Scope(currentScope);
             tempNode.allStmt.accept(this);
@@ -517,8 +524,16 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(ReturnStmtNode tempNode) {
-        if (!tempNode.inFunc) {
+        if (!tempNode.inFunc && !tempNode.inClass ) {
             throw new semanticError("can't return outside function", tempNode.nodePos);
+        }
+        // inClass = true && inFunc == false 只有可能是 constructor 了
+        if ( tempNode.inClassFunc == null ){ // constructor
+            if ( tempNode.retExpr != null ){
+                throw new semanticError("constructor can't return value", tempNode.nodePos);
+            }else{
+                return ;
+            }
         }
         tempNode.inClassFunc.isReturned = true;
         if (tempNode.retExpr == null) {
@@ -591,7 +606,7 @@ public class SemanticChecker implements ASTVisitor {
             throw new semanticError("no such class " + tempNode.varType.getTypeName(), tempNode.nodePos);
         }
 
-        for (var each : tempNode.exprList) {
+        for (var each : tempNode.exprList) { // todo null pointer 需要 containVar 全局特判
             deliverSituation(tempNode, each);
             each.accept(this);
             if (!each.expType.isInt()) {
