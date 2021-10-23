@@ -17,7 +17,7 @@ import java.io.InputStream;
 
 public class Main {
     public static void main(String args[]){
-//        String fileName = "designed_testcase/temp.mx" ; // todo 把所有可能出 null 的加特判
+        String fileName = "designed_testcase/temp.mx" ; // todo 把所有可能出 null 的加特判
         try {
 //            InputStream input = new FileInputStream(fileName) ;
             InputStream input = System.in ;
@@ -44,5 +44,6 @@ public class Main {
             System.err.println(er.toString());
         }
 //        System.out.println("hello world");
+        // mark: pass semantic
     } // todo 可以用 getText 来打印错误 // todo 到时候用 == null 和 size == 0 同时判空
 }
