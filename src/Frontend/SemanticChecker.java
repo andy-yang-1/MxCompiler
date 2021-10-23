@@ -95,6 +95,7 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(ConstructorDefNode tempNode) { // todo 注意 有参数的未定义
+
         tempNode.allStmt.inClass = true;
         tempNode.allStmt.inFunc = false ;
         tempNode.allStmt.inClassName = tempNode.className;
@@ -302,15 +303,16 @@ public class SemanticChecker implements ASTVisitor {
             }
         } else {
             String func_name = ((PrimaryNode) tempNode.expr).primaryStr;
-            if (!gScope.containFunc(func_name)  ) {
-                if (tempNode.inClass && gScope.hasSuchMethod(tempNode.inClassName, func_name)) {
-                    reg_func = gScope.registered_class.get(tempNode.inClassName).funcRegisteredInClass.get(func_name) ;
-                }else{
-                    throw new semanticError("no such function", tempNode.nodePos);
-                }
+            if (tempNode.inClass && gScope.hasSuchMethod(tempNode.inClassName, func_name)) { // todo 优先级应该是 method > function
+                reg_func = gScope.registered_class.get(tempNode.inClassName).funcRegisteredInClass.get(func_name) ;
             }else{
-                reg_func = gScope.funcs.get(func_name);
+                if (!gScope.containFunc(func_name)  ) {
+                    throw new semanticError("no such function", tempNode.nodePos);
+                }else{
+                    reg_func = gScope.funcs.get(func_name);
+                }
             }
+
         }
 
         if (reg_func.parList.size() != tempNode.parList.size()) {
@@ -357,9 +359,9 @@ public class SemanticChecker implements ASTVisitor {
             }
         }
 
-        if (!(tempNode.exprNode instanceof PrimaryNode) && !(tempNode.exprNode instanceof IdExprNode) && !(tempNode.exprNode instanceof IndexExprNode) ) {
-            throw new semanticError("only primary id and index expression node can be ++/--", tempNode.nodePos);
-        }
+//        if (!(tempNode.exprNode instanceof PrimaryNode) && !(tempNode.exprNode instanceof IdExprNode) && !(tempNode.exprNode instanceof IndexExprNode) ) {
+//            throw new semanticError("only primary id and index expression node can be ++/--", tempNode.nodePos);
+//        }
         if (!tempNode.exprNode.expType.isInt()) {
             throw new semanticError("only int can be ++/--", tempNode.nodePos);
         }
@@ -604,6 +606,10 @@ public class SemanticChecker implements ASTVisitor {
     public void visit(NormalNewNode tempNode) {
         if (!gScope.containClass(tempNode.varType.getTypeName())) {
             throw new semanticError("no such class " + tempNode.varType.getTypeName(), tempNode.nodePos);
+        }
+
+        if ( tempNode.varType.isVoid() ){
+            throw new semanticError("variable type can't be void", tempNode.nodePos);
         }
 
         for (var each : tempNode.exprList) { // todo null pointer 需要 containVar 全局特判

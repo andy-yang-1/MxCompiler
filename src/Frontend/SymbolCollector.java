@@ -91,6 +91,12 @@ public class SymbolCollector implements ASTVisitor {
             throw new semanticError("too many constructor in class ", tempNode.nodePos);
         }
 
+        if ( tempNode.constructorDefInClass.size() == 1 ){
+            if ( !tempNode.constructorDefInClass.get(0).className.equals(tempNode.className) ){
+                throw new semanticError("constructor name mismatch", tempNode.nodePos);
+            }
+        }
+
         gScope.registered_class.put(tempNode.className,tempNode) ; // 登记结束
 
     }
