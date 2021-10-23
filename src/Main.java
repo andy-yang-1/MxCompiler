@@ -44,6 +44,6 @@ public class Main {
             System.err.println(er.toString());
         }
 //        System.out.println("hello world");
-        // mark: pass semantic
+        // mark: semantic passed in 10.23
     } // todo 可以用 getText 来打印错误 // todo 到时候用 == null 和 size == 0 同时判空
 }
