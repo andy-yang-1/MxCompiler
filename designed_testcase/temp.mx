@@ -6,6 +6,11 @@ Verdict: Success
 Origin Package: Semantic Pretest
 */
 
+int kk(){
+    return 0 ;
+}
+
+int ddd = kk() ;
 
 int main(){
     int d = [&](int a) -> {

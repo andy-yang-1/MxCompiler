@@ -19,8 +19,8 @@ public class Main {
     public static void main(String args[]){
         String fileName = "designed_testcase/temp.mx" ; // todo 把所有可能出 null 的加特判
         try {
-//            InputStream input = new FileInputStream(fileName) ;
-            InputStream input = System.in ;
+            InputStream input = new FileInputStream(fileName) ;
+//            InputStream input = System.in ;
             RootNode ASTRoot ;
             MxStarLexer lexer = new MxStarLexer(CharStreams.fromStream(input)) ;
             lexer.removeErrorListeners();
