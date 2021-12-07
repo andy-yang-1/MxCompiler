@@ -1,8 +1,10 @@
 import ASTNodeType.ASTNode;
 import ASTNodeType.RootNode;
 import Frontend.ASTBuilder;
+import Frontend.IRBuilder;
 import Frontend.SemanticChecker;
 import Frontend.SymbolCollector;
+import IR.IRModule;
 import Parser.MxStarLexer;
 import Parser.MxStarParser;
 import Util.MxStarErrorListener;
@@ -13,7 +15,9 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 public class Main {
     public static void main(String args[]){
@@ -36,7 +40,12 @@ public class Main {
             ASTRoot.accept(symbolCollector);
             SemanticChecker semanticChecker = new SemanticChecker(gScope) ;
             ASTRoot.accept(semanticChecker);
-//            System.out.println("hello world");
+
+            IRModule irModule = new IRModule() ;
+            IRBuilder irBuilder = new IRBuilder(gScope,irModule) ;
+            OutputStream IRFile = new FileOutputStream("IROutput.ll") ;
+            IRFile.write(irModule.toString().getBytes());
+            System.out.println("hello world");
         } catch (error e){ // todo here fail to catch the error in fromStream
             System.err.println(e.toString());
             throw new RuntimeException() ;

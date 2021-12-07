@@ -118,7 +118,7 @@ public class ASTBuilder extends MxStarBaseVisitor<ASTNode> {
         ConstructorDefNode temp_node = new ConstructorDefNode(new position(ctx), ctx.Identifier().getText());
         if (ctx.functionParaList() != null) {
             for (var each : ctx.functionParaList().paraVarDef()) {
-                temp_node.parList.put(each.Identifier().getText(), new Type(each.type()));
+                temp_node.parList.add(new SingleDefNode(new position(each),each.Identifier().getText(),new Type(each.type())));
             }
         }
         temp_node.allStmt = (SuiteNode) visit(ctx.suite());

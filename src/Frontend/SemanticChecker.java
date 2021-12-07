@@ -38,6 +38,11 @@ public class SemanticChecker implements ASTVisitor {
         b.inClassFunc = a.inClassFunc;
     }
 
+    public static void receiveFlowControl( StmtNode a , StmtNode b ){ // a -> b
+        b.IR_FuncIsReturned = a.IR_FuncIsReturned ;
+        b.IR_LoopIsBreaked = a.IR_LoopIsBreaked || a.IR_FuncIsReturned ;
+    }
+
     @Override
     public void visit(RootNode tempNode) {
         if (!gScope.containFunc("main")) {
@@ -173,7 +178,7 @@ public class SemanticChecker implements ASTVisitor {
                     throw new semanticError("not in class no this expression", tempNode.nodePos);
                 } else {
                     tempNode.expType = new Type(tempNode.inClassName, 0);
-                    tempNode.isLeftValue = true;
+                    tempNode.isLeftValue = true; // semantic 允许 this -> leftValue 竟然没出问题?
                 }
                 break;
             case literalType:
@@ -312,6 +317,7 @@ public class SemanticChecker implements ASTVisitor {
             String func_name = ((PrimaryNode) tempNode.expr).primaryStr;
             if (tempNode.inClass && gScope.hasSuchMethod(tempNode.inClassName, func_name)) { // todo 优先级应该是 method > function
                 reg_func = gScope.registered_class.get(tempNode.inClassName).funcRegisteredInClass.get(func_name);
+                tempNode.func_call = reg_func ;
             } else {
                 if (!gScope.containFunc(func_name)) {
                     throw new semanticError("no such function", tempNode.nodePos);
@@ -412,14 +418,13 @@ public class SemanticChecker implements ASTVisitor {
             throw new semanticError("only left value can be assigned", tempNode.nodePos);
         }
         tempNode.expType = tempNode.expr1.expType;
-        tempNode.isLeftValue = true;
+        tempNode.isLeftValue = false;
     }
 
     @Override
     public void visit(SuiteNode tempNode) {
         currentScope = new Scope(currentScope);
         if (tempNode.paraShot) {
-            tempNode.paraShot = false;
             for (var each : tempNode.inClassFunc.parList) {
                 currentScope.members.put(each.parName, each);
             }
@@ -430,6 +435,9 @@ public class SemanticChecker implements ASTVisitor {
             eachStmt.inLoop = tempNode.inLoop;
             eachStmt.retType = tempNode.retType;
             eachStmt.accept(this);
+            if ( !tempNode.flowIsInterrupted() && eachStmt.flowIsInterrupted() ){
+                receiveFlowControl(eachStmt,tempNode);
+            }
         }
         currentScope = currentScope.parentScope;
     }
@@ -461,6 +469,12 @@ public class SemanticChecker implements ASTVisitor {
             tempNode.falseStmt.retType = tempNode.retType;
             tempNode.falseStmt.inLoop = tempNode.inLoop;
             tempNode.falseStmt.accept(this);
+            if ( tempNode.trueStmt.flowIsInterrupted() && tempNode.falseStmt.flowIsInterrupted() ){
+                tempNode.IR_FuncIsReturned = tempNode.trueStmt.IR_FuncIsReturned && tempNode.falseStmt.IR_FuncIsReturned ;
+                tempNode.IR_LoopIsBreaked = true ;
+            }
+        }else{
+            receiveFlowControl(tempNode.trueStmt,tempNode);
         }
     }
 
@@ -496,6 +510,8 @@ public class SemanticChecker implements ASTVisitor {
             tempNode.allStmt.accept(this);
         }
 
+        tempNode.IR_FuncIsReturned = tempNode.allStmt.IR_FuncIsReturned ;
+
     }
 
     @Override
@@ -516,6 +532,8 @@ public class SemanticChecker implements ASTVisitor {
         } else {
             tempNode.allStmt.accept(this);
         }
+
+        tempNode.IR_FuncIsReturned = tempNode.allStmt.IR_FuncIsReturned ;
     }
 
     @Override
@@ -523,6 +541,7 @@ public class SemanticChecker implements ASTVisitor {
         if (!tempNode.inLoop) {
             throw new semanticError("cannot continue outside the loop", tempNode.nodePos);
         }
+        tempNode.IR_LoopIsBreaked = true ;
     }
 
     @Override
@@ -530,6 +549,7 @@ public class SemanticChecker implements ASTVisitor {
         if (!tempNode.inLoop) {
             throw new semanticError("cannot break outside the loop", tempNode.nodePos);
         }
+        tempNode.IR_LoopIsBreaked = true ;
     }
 
     @Override
@@ -546,6 +566,7 @@ public class SemanticChecker implements ASTVisitor {
             }
         }
         tempNode.inClassFunc.isReturned = true;
+        tempNode.IR_FuncIsReturned = true ;
         if (tempNode.retExpr == null) {
             if (tempNode.retType.isVoid())
                 return;

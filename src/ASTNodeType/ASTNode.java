@@ -1,6 +1,7 @@
 package ASTNodeType;
 
 import ASTNodeType.DefNodeType.FuncDefNode;
+import IR.IRBasicBlock;
 import Util.position ;
 
 abstract public class ASTNode {
@@ -9,9 +10,11 @@ abstract public class ASTNode {
 
     public boolean inClass = false ;
     public boolean inFunc = false ;
-    public boolean paraShot = false ;
+//    public boolean paraShot = false ;
     public String inClassName ;
     public FuncDefNode inClassFunc = null ;
+
+    public IRBasicBlock finalBlock ; // expression 也要用
 
     public ASTNode(position temp_pos){
         nodePos = temp_pos ;

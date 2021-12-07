@@ -29,7 +29,7 @@ public class globalScope {
         registered_class.put("void",new ClassDefNode("void",temp_pos)) ;
         registered_class.put("string",new ClassDefNode("string",temp_pos)) ; // todo string functions are not implemented
 
-        // normal function
+        // normal function // todo add built-in-function tag
         funcs.put("print",new FuncDefNode(temp_pos,"print",new Type("void",0))) ;
         (funcs.get("print")).parList.add(new SingleDefNode(temp_pos,"str",new Type("string",0))) ;
 
@@ -49,7 +49,7 @@ public class globalScope {
         funcs.put("toString",new FuncDefNode(temp_pos,"toString",new Type("string",0))) ;
         (funcs.get("toString")).parList.add(new SingleDefNode(temp_pos,"i",new Type("int",0))) ;
 
-        // string method
+        // string method // todo add built-in-function tag
         ClassDefNode s_node = registered_class.get("string") ;
         s_node.funcRegisteredInClass.put("length",new FuncDefNode(temp_pos,"length",new Type("int",0))) ;
         s_node.funcRegisteredInClass.put("substring",new FuncDefNode(temp_pos,"substring",new Type("string",0))) ;
@@ -59,7 +59,7 @@ public class globalScope {
         s_node.funcRegisteredInClass.put("ord",new FuncDefNode(temp_pos,"ord",new Type("int",0))) ;
         (s_node.funcRegisteredInClass.get("ord")).parList.add(new SingleDefNode(temp_pos,"pos",new Type("int",0))) ;
 
-        // array method
+        // array method // todo add built-in-function tag
         array_size_func = new FuncDefNode(temp_pos,"size",new Type("int",0)) ;
 
     }

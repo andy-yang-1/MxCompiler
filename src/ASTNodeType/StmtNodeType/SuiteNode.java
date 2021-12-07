@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 public class SuiteNode extends StmtNode {
     public ArrayList<StmtNode> allStmt ;
+    public boolean paraShot = false ;
 
 
     public SuiteNode(position temp_pos) {

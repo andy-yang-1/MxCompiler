@@ -12,14 +12,14 @@ import java.util.HashMap;
 
 public class ConstructorDefNode extends ASTNode {
 
-    public HashMap<String, Type> parList ; // para_name -> type
+    public ArrayList<SingleDefNode> parList ; // para_name -> type
     public String className ;
     public SuiteNode allStmt ;
 
     public ConstructorDefNode(position temp_pos,String temp_name ) {
         super(temp_pos);
         className = new String(temp_name) ;
-        parList = new HashMap<>() ;
+        parList = new ArrayList<>() ;
     }
 
 
