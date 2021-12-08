@@ -28,6 +28,7 @@ public class IRBasicBlock {
     public String toString(){
         StringBuilder block_str = new StringBuilder(blockReg.regName + ":\n");
         for ( var each : instList ){
+            block_str.append("\t") ;
             block_str.append(each.toString()).append("\n");
         }
         return block_str.toString();

@@ -28,6 +28,8 @@ public abstract class IRType {
             return new integerType(32) ;
         } else if ( temp_type.isBool() ){
             return new integerType(8) ;
+        } else if ( temp_type.isString() ){
+            return new pointerType( new integerType(8)) ;
         } else if ( temp_type.dimension == 0){
             return new pointerType(structTable.get(temp_type.typeName)) ;
         } else{

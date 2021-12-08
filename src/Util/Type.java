@@ -69,6 +69,10 @@ public class Type {
 
     public boolean isLambda(){ return typeName.equals("LAMBDA") ; }
 
+    public boolean isConservedClass(){
+        return isInt() || isBool() || isVoid() || isString() ;
+    }
+
     public boolean isAssignable( Type other ){
         if ( this.equals(other) ) return true ;
         if ( other.isNull() ){

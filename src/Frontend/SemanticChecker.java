@@ -317,7 +317,6 @@ public class SemanticChecker implements ASTVisitor {
             String func_name = ((PrimaryNode) tempNode.expr).primaryStr;
             if (tempNode.inClass && gScope.hasSuchMethod(tempNode.inClassName, func_name)) { // todo 优先级应该是 method > function
                 reg_func = gScope.registered_class.get(tempNode.inClassName).funcRegisteredInClass.get(func_name);
-                tempNode.func_call = reg_func ;
             } else {
                 if (!gScope.containFunc(func_name)) {
                     throw new semanticError("no such function", tempNode.nodePos);
@@ -344,6 +343,7 @@ public class SemanticChecker implements ASTVisitor {
 
         tempNode.expType = reg_func.retType;
         tempNode.isLeftValue = false;
+        tempNode.func_call = reg_func ;
     }
 
     @Override

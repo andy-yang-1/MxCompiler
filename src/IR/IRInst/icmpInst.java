@@ -20,7 +20,7 @@ public class icmpInst extends IRInst{
             case slt : temp_str = "slt" ; break;
             case sle : temp_str = "sle" ; break;
         }
-        return resultReg.toString() + " = icmp " + temp_str + " " + leftOperand.getType().toString() + " " + leftOperand.toString() + " " + rightOperand.toString() ;
+        return resultReg.toString() + " = icmp " + temp_str + " " + leftOperand.getType().toString() + " " + leftOperand.toString() + ", " + rightOperand.toString() ;
     }
 
     public enum cmpCond{

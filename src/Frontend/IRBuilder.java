@@ -50,7 +50,8 @@ public class IRBuilder implements ASTVisitor {
         // build struct table
         for ( var tempClassNode : gScope.registered_class.values() ){
             structType tempStruct = new structType(tempClassNode) ;
-            irModule.structTable.put(tempClassNode.className,tempStruct) ;
+            if ( !Type.isConservedWord(tempClassNode.className) )
+                irModule.structTable.put(tempClassNode.className,tempStruct) ;
         }
 
         IRType.deliverTable(irModule.structTable); // deliver table to get pointer type
@@ -80,6 +81,88 @@ public class IRBuilder implements ASTVisitor {
                 irModule.functionTable.put(tempClassNode.inClassName+"."+tempClassNode.inClassName,tempFunction) ;
             }
         }
+
+        // todo main 函数自动补上 return 0 ;
+
+        // add string method
+        IRFunction tempIRFunction ;
+        FuncDefNode tempDefNode ;
+
+        // str.length()
+        tempDefNode =  new FuncDefNode(new position(0,0),"string_length",new Type("int",0))  ;
+        tempDefNode.parList.add(new SingleDefNode(new position(0,0),"p",new Type("string",0))) ;
+        tempIRFunction = new IRFunction(tempDefNode) ;
+        irModule.functionTable.put("string_length",tempIRFunction) ;
+
+        // str.substring( int left , int right )
+        tempDefNode = new FuncDefNode(new position(0,0),"string_substring",new Type("string",0)) ;
+        tempDefNode.parList.add(new SingleDefNode(new position(0,0),"p",new Type("string",0))) ;
+        tempDefNode.parList.add(new SingleDefNode(new position(0,0),"left",new Type("int",0))) ;
+        tempDefNode.parList.add(new SingleDefNode(new position(0,0),"right",new Type("int",0))) ;
+        tempIRFunction = new IRFunction(tempDefNode) ;
+        irModule.functionTable.put("string_substring",tempIRFunction) ;
+
+        // str.parseInt()
+        tempDefNode =  new FuncDefNode(new position(0,0),"string_parseInt",new Type("int",0))  ;
+        tempDefNode.parList.add(new SingleDefNode(new position(0,0),"p",new Type("string",0))) ;
+        tempIRFunction = new IRFunction(tempDefNode) ;
+        irModule.functionTable.put("string_parseInt",tempIRFunction) ;
+
+        // str.ord()
+        tempDefNode =  new FuncDefNode(new position(0,0),"string_ord",new Type("int",0))  ;
+        tempDefNode.parList.add(new SingleDefNode(new position(0,0),"p",new Type("string",0))) ;
+        tempDefNode.parList.add(new SingleDefNode(new position(0,0),"pos",new Type("int",0))) ;
+        tempIRFunction = new IRFunction(tempDefNode) ;
+        irModule.functionTable.put("string_ord",tempIRFunction) ;
+
+        // str1 + str2
+        tempDefNode =  new FuncDefNode(new position(0,0),"string_add",new Type("string",0))  ;
+        tempDefNode.parList.add(new SingleDefNode(new position(0,0),"p1",new Type("string",0))) ;
+        tempDefNode.parList.add(new SingleDefNode(new position(0,0),"p2",new Type("string",0))) ;
+        tempIRFunction = new IRFunction(tempDefNode) ;
+        irModule.functionTable.put("string_add",tempIRFunction) ;
+
+        // str1 > str2
+        tempDefNode =  new FuncDefNode(new position(0,0),"string_sgt",new Type("bool",0))  ;
+        tempDefNode.parList.add(new SingleDefNode(new position(0,0),"p",new Type("string",0))) ;
+        tempDefNode.parList.add(new SingleDefNode(new position(0,0),"q",new Type("string",0))) ;
+        tempIRFunction = new IRFunction(tempDefNode) ;
+        irModule.functionTable.put("string_sgt",tempIRFunction) ;
+
+        // str1 < str2
+        tempDefNode =  new FuncDefNode(new position(0,0),"string_slt",new Type("bool",0))  ;
+        tempDefNode.parList.add(new SingleDefNode(new position(0,0),"p",new Type("string",0))) ;
+        tempDefNode.parList.add(new SingleDefNode(new position(0,0),"q",new Type("string",0))) ;
+        tempIRFunction = new IRFunction(tempDefNode) ;
+        irModule.functionTable.put("string_slt",tempIRFunction) ;
+
+        // str1 >= str2
+        tempDefNode =  new FuncDefNode(new position(0,0),"string_sge",new Type("bool",0))  ;
+        tempDefNode.parList.add(new SingleDefNode(new position(0,0),"p",new Type("string",0))) ;
+        tempDefNode.parList.add(new SingleDefNode(new position(0,0),"q",new Type("string",0))) ;
+        tempIRFunction = new IRFunction(tempDefNode) ;
+        irModule.functionTable.put("string_sge",tempIRFunction) ;
+
+        // str1 <= str2
+        tempDefNode =  new FuncDefNode(new position(0,0),"string_sle",new Type("bool",0))  ;
+        tempDefNode.parList.add(new SingleDefNode(new position(0,0),"p",new Type("string",0))) ;
+        tempDefNode.parList.add(new SingleDefNode(new position(0,0),"q",new Type("string",0))) ;
+        tempIRFunction = new IRFunction(tempDefNode) ;
+        irModule.functionTable.put("string_sle",tempIRFunction) ;
+
+        // str1 == str2
+        tempDefNode =  new FuncDefNode(new position(0,0),"string_eq",new Type("bool",0))  ;
+        tempDefNode.parList.add(new SingleDefNode(new position(0,0),"p",new Type("string",0))) ;
+        tempDefNode.parList.add(new SingleDefNode(new position(0,0),"q",new Type("string",0))) ;
+        tempIRFunction = new IRFunction(tempDefNode) ;
+        irModule.functionTable.put("string_eq",tempIRFunction) ;
+
+        // str1 != str2
+        tempDefNode =  new FuncDefNode(new position(0,0),"string_ne",new Type("bool",0))  ;
+        tempDefNode.parList.add(new SingleDefNode(new position(0,0),"p",new Type("string",0))) ;
+        tempDefNode.parList.add(new SingleDefNode(new position(0,0),"q",new Type("string",0))) ;
+        tempIRFunction = new IRFunction(tempDefNode) ;
+        irModule.functionTable.put("string_ne",tempIRFunction) ;
 
         for ( var tempFunction : irModule.functionTable.values() ){
             currentFunction = tempFunction ;
@@ -115,7 +198,7 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(FuncDefNode tempNode) {
         currentFunction.regCnt = tempNode.parList.size() ; // 第一个 block 的 reg_num 在参数之后
-        IRReg temp_reg = new IRReg(currentFunction.regCnt++,"block",new labelType()) ;
+        IRReg temp_reg = new IRReg(currentFunction.regCnt++,"block",new labelType()) , return_val = new IRReg(currentFunction.regCnt++,"return_val",IRType.getRightType(tempNode.retType)) ; ;
         currentBlock = new IRBasicBlock(temp_reg) ;
         currentFunction.blockList.add(currentBlock) ;
         // allocate ret address
@@ -127,9 +210,8 @@ public class IRBuilder implements ASTVisitor {
         for ( var each : currentFunction.allocaList ){ // 将所有的 allocation 放入头部
             currentFunction.blockList.get(0).instList.add(0,new allocaInst(each)) ;
         }
-        IRReg return_val = new IRReg(currentFunction.regCnt++,"return_val",IRType.getRightType(tempNode.retType)) ;
+        currentFunction.retBlock.AddInst(new loadInst(return_val,currentFunction.retReg));
         currentFunction.retBlock.AddInst(new retInst(return_val));
-        // todo 将 retBlock 实例化
     }
 
     @Override
@@ -183,6 +265,14 @@ public class IRBuilder implements ASTVisitor {
                         break ;
                     case literalString:
                         // todo 去全局留下字符串常量空间
+                        SingleDefNode temp_str_node  = new SingleDefNode(new position(0,0),"temp_str"+String.valueOf(irModule.globalVariableTable.size()),new Type("string",0)) ;
+                        temp_str_node.expAns = tempNode ;
+                        IRGlobal temp_string_const = new IRGlobal(temp_str_node) ;
+                        temp_string_const.isStringConstant = true ;
+                        irModule.globalVariableTable.put("temp_str"+String.valueOf(irModule.globalVariableTable.size()),temp_string_const) ;
+                        IRReg temp_reg = new IRReg(currentFunction.regCnt++,"charStar",new pointerType(new integerType(8))) ;
+                        currentBlock.AddInst(new getelementptrInst(temp_reg,temp_string_const,new integerConst(0), new integerConst(0)));
+                        tempNode.expOperand = temp_reg ;
                         break ;
                 }
                 break ;
@@ -193,7 +283,7 @@ public class IRBuilder implements ASTVisitor {
                     int ptr_idx = irModule.structTable.get(tempNode.inClassName).getMemberIdx(tempNode.primaryStr) ;
                     IRReg temp_reg = new IRReg(currentFunction.regCnt++,"temp",IRType.getLeftType(tempNode.expType)) ; // 申请一个该空间的寄存器
                     IROperand this_ptr = Left_to_right_access(currentScope.GetRegPointerAllSearch("this")) ; // 去到真实的结构体空间 需要 load 2 次 , 但获得左值空间只需要一次
-                    currentBlock.AddInst(new getelementptrInst(temp_reg,irModule.structTable.get(tempNode.inClassName),this_ptr,new integerConst(0),new integerConst(ptr_idx))); // 用 idx 可得到真实指针类型
+                    currentBlock.AddInst(new getelementptrInst(temp_reg,this_ptr,new integerConst(0),new integerConst(ptr_idx))); // 用 idx 可得到真实指针类型
                     tempNode.expOperand = temp_reg ;
                 }else{
                     tempNode.expOperand = irModule.globalVariableTable.get(tempNode.primaryStr) ;
@@ -400,7 +490,7 @@ public class IRBuilder implements ASTVisitor {
         left_operand = Left_to_right_access(tempNode.expr1.expOperand) ; // addr2 目标空间
         Type temp_type = new Type(tempNode.expType.typeName,tempNode.expType.dimension-1) ;
         IRReg temp_reg = new IRReg(currentFunction.regCnt++,"temp",IRType.getLeftType(temp_type)) ;
-        currentBlock.AddInst(new getelementptrInst(temp_reg,IRType.getRightType(temp_type),left_operand,right_operand,new integerConst(0)));
+        currentBlock.AddInst(new getelementptrInst(temp_reg,left_operand,right_operand,new integerConst(0)));
         tempNode.expOperand = temp_reg ;
     }
 
@@ -417,7 +507,11 @@ public class IRBuilder implements ASTVisitor {
         if ( tempNode.expr instanceof IdExprNode ){ // 拿到指定元素的左值
             tempNode.expr.accept(this);
             temp_list.add(Left_to_right_access(tempNode.expr.expOperand)) ;
-            called_function = irModule.functionTable.get(tempNode.expr.expType.typeName+"."+tempNode.func_call.funcName) ;
+            if ( tempNode.expr.expType.isString() ){ // string builtin method
+                called_function = irModule.functionTable.get("string_" + tempNode.func_call.funcName) ;
+            }else{ // normal method
+                called_function = irModule.functionTable.get(tempNode.expr.expType.typeName+"."+tempNode.func_call.funcName) ;
+            }
         } else{
             called_function = irModule.functionTable.get(tempNode.func_call.funcName) ;
         }
@@ -538,7 +632,7 @@ public class IRBuilder implements ASTVisitor {
     }
 
     @Override
-    public void visit(SuiteNode tempNode) { // todo handle return
+    public void visit(SuiteNode tempNode) {
         currentScope = new Scope(currentScope) ;
         if ( tempNode.paraShot ){
             for ( int i = 0 ; i < tempNode.inClassFunc.parList.size() ; i++ ){
@@ -551,7 +645,7 @@ public class IRBuilder implements ASTVisitor {
                 currentBlock.AddInst(new storeInst(new IRReg(i,"",IRType.getRightType(each.parType)),para_reg)); // 前几个 %i 都是传入的右值
             }
         }
-        for ( var eachStmt : tempNode.allStmt ){ // todo use finalBlock to mange the flow control
+        for ( var eachStmt : tempNode.allStmt ){
             eachStmt.accept(this);
         }
         tempNode.finalBlock = currentBlock ;
@@ -702,19 +796,19 @@ public class IRBuilder implements ASTVisitor {
     }
 
     @Override
-    public void visit(ContinueStmtNode tempNode) { // todo flow control
+    public void visit(ContinueStmtNode tempNode) {
         tempNode.finalBlock = currentBlock ;
         currentBlock.AddInst(new brInst(loopBlockStack.peek().loopBlock.blockReg));
     }
 
     @Override
-    public void visit(BreakStmtNode tempNode) { // todo flow control
+    public void visit(BreakStmtNode tempNode) {
         tempNode.finalBlock = currentBlock ;
         currentBlock.AddInst(new brInst(loopBlockStack.peek().nextBlock.blockReg));
     }
 
     @Override
-    public void visit(ReturnStmtNode tempNode) { // todo flow control
+    public void visit(ReturnStmtNode tempNode) {
 
         if ( tempNode.retType != null ){
             tempNode.retExpr.accept(this);
@@ -729,7 +823,7 @@ public class IRBuilder implements ASTVisitor {
     }
 
     @Override
-    public void visit(IdExprNode tempNode) { // todo flow control
+    public void visit(IdExprNode tempNode) {
         tempNode.expr.accept(this); // expr -> left value
 
         if ( tempNode.func_call != null ){ // 已经有函数 只需传递左值
@@ -740,7 +834,7 @@ public class IRBuilder implements ASTVisitor {
         int ptr_idx = irModule.structTable.get(tempNode.expr.expType.getTypeName()).getMemberIdx(tempNode.ID) ;
         IRReg temp_reg = new IRReg(currentFunction.regCnt++,tempNode.ID,IRType.getLeftType(tempNode.expType)) ;
         IROperand this_ptr = Left_to_right_access(tempNode.expr.expOperand) ;
-        currentBlock.AddInst(new getelementptrInst(temp_reg,irModule.structTable.get(tempNode.expType.getTypeName()),this_ptr,new integerConst(0),new integerConst(ptr_idx)));
+        currentBlock.AddInst(new getelementptrInst(temp_reg,this_ptr,new integerConst(0),new integerConst(ptr_idx)));
 
         tempNode.expOperand = temp_reg ;
     }
@@ -786,7 +880,7 @@ public class IRBuilder implements ASTVisitor {
                 temp_operand = Left_to_right_access(temp_operand) ;
             }
             cnt_reg = new IRReg(currentFunction.regCnt++,"cnt_reg",new integerType(32)) ;
-            currentBlock.AddInst( new getelementptrInst(cnt_reg,new integerType(32),para_array_reg,new integerConst(i),new integerConst(0)));
+            currentBlock.AddInst( new getelementptrInst(cnt_reg,para_array_reg,new integerConst(i),new integerConst(0)));
             currentBlock.AddInst(new storeInst(temp_operand,cnt_reg));
         }
 

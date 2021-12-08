@@ -38,7 +38,12 @@ public class IRModule {
 
         // print global (without string constant)
         for ( var each : globalVariableTable.values() ){
-            all_ir_text.append(each.toString()).append(" = global ").append(each.getType().toString()).append(" zeroinitializer\n"); // todo 仅提供 global 方法 unnameaddr in need
+            if ( !each.isStringConstant ) {
+                all_ir_text.append(each.toString()).append(" = global ").append(each.getType().toString()).append(" zeroinitializer\n");
+            }else{ // constant [12 x i8] c"hello world\00"
+
+                all_ir_text.append(each.toString()).append(" = private unnamed_addr constant [" + String.valueOf(each.getLLVMStringSize()) +" x i8] " + each.getLLVMStringConst() ) ;
+            }
         }
 
         all_ir_text.append("\n");
@@ -65,11 +70,13 @@ public class IRModule {
             all_ir_text.append(")\n");
 
             if ( each.funcDefNode.allStmt != null ){
+                all_ir_text.deleteCharAt(all_ir_text.length()-1) ;
+                all_ir_text.append("{\n") ;
                 for ( var eachBlock : each.blockList ){
                     all_ir_text.append(eachBlock.toString());
                 }
                 all_ir_text.append(each.retBlock.toString()) ;
-                all_ir_text.append("\n") ;
+                all_ir_text.append("}\n") ;
             }
 
             all_ir_text.append("\n");

@@ -20,7 +20,7 @@ public class binaryInst extends IRInst {
             case orInst: temp_str = "or" ; break ;
             case xorInst: temp_str = "xor" ; break ;
         }
-        return resultReg.toString() + " = " + temp_str + " " + resultReg.regType.toString() + " " + leftOperand.toString() + " " + rightOperand.toString() ;
+        return resultReg.toString() + " = " + temp_str + " " + resultReg.regType.toString() + " " + leftOperand.toString() + " , " + rightOperand.toString() ;
     }
 
     public enum binaryToken{
