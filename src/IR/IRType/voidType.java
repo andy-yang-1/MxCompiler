@@ -7,6 +7,11 @@ public class voidType extends IRType{
     }
 
     @Override
+    public boolean equals(IRType other) {
+        return other instanceof voidType;
+    }
+
+    @Override
     public String toString() {
         return "void";
     }

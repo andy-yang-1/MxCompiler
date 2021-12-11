@@ -1,6 +1,7 @@
 package IR;
 
 import IR.IRInst.IRInst;
+import IR.IRInst.truncInst;
 import IR.IROperand.IRReg;
 
 import java.util.ArrayList;
@@ -22,6 +23,12 @@ public class IRBasicBlock {
     }
 
     public void AddInst( IRInst temp_inst ){
+
+//        if ( (temp_inst instanceof truncInst) && (temp_inst.resultReg.regType.equals(((truncInst) temp_inst).rightTruncOperand.getType()) ) ){ // 自适应: 类型相同就不添加
+//            return ;
+//        }
+        // todo bitcast 自适应添加
+
         instList.add(temp_inst) ;
     }
 

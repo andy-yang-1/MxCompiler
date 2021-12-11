@@ -1,5 +1,5 @@
 int main(){
-    if ( true )
-        println("hello world") ;
-    return 0 ;
+    if (true)
+       int x = 1 ;
+
 }

@@ -7,6 +7,11 @@ public class labelType extends IRType{
     }
 
     @Override
+    public boolean equals(IRType other) {
+        return other instanceof labelType;
+    }
+
+    @Override
     public String toString() {
         return "label";
     }

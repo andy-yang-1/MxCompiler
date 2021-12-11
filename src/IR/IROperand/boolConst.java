@@ -10,12 +10,12 @@ public class boolConst extends IROperand {
     }
     @Override
     public IRType getType() {
-        return new integerType(1);
+        return new integerType(8);
     }
 
     @Override
     public String toString() {
-        if ( boolVal ) return "true" ;
-        return "false";
+        if ( boolVal ) return "1" ;
+        return "0";
     }
 }

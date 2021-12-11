@@ -14,6 +14,11 @@ public class integerType extends IRType{
     }
 
     @Override
+    public boolean equals(IRType other) {
+        return other instanceof integerType && ((integerType) other).integerSize == integerSize;
+    }
+
+    @Override
     public String toString() {
         return "i" + String.valueOf(integerSize);
     }

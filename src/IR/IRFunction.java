@@ -18,6 +18,8 @@ public class IRFunction {
     public ArrayList<IRBasicBlock> blockList ;
     public ArrayList<IRReg> allocaList ;
 
+    public String IRFunctionName ;
+
     public IRReg retReg ;
     public IRBasicBlock retBlock ;
 
@@ -29,12 +31,14 @@ public class IRFunction {
         funcDefNode = tempNode ;
         blockList = new ArrayList<>() ;
         allocaList = new ArrayList<>() ;
+        IRFunctionName = tempNode.funcName ;
     }
 
     public IRFunction( ConstructorDefNode tempNode ){
         constructorDefNode = tempNode ;
         blockList = new ArrayList<>() ;
         allocaList = new ArrayList<>() ;
+        IRFunctionName = tempNode.className + "." + tempNode.className ;
     }
 
 

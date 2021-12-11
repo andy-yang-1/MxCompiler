@@ -14,6 +14,12 @@ public class pointerType extends IRType{
     }
 
     @Override
+    public boolean equals(IRType other) {
+        if ( other instanceof pointerType && ((pointerType)other).pointerToType.equals(pointerToType) ) return true ;
+        return false;
+    }
+
+    @Override
     public String toString() {
         return pointerToType.toString() + "*";
     }

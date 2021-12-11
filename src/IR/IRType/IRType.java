@@ -34,9 +34,11 @@ public abstract class IRType {
             return new pointerType(structTable.get(temp_type.typeName)) ;
         } else{
             Type latter_type = new Type(temp_type.typeName,temp_type.dimension-1) ;
-            return new pointerType(new arrayType(new integerConst(0),getRightType(latter_type))) ;
+            return new pointerType(getRightType(latter_type)) ;
         }
     }
+
+    public abstract boolean equals( IRType other ) ;
 
     public abstract String toString() ;
 

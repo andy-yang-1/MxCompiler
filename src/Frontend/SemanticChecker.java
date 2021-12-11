@@ -29,7 +29,6 @@ public class SemanticChecker implements ASTVisitor {
         return exp1.expType.equals(exp2.expType);
     }
 
-    // todo 还没有在函数里查 return 的存在
 
     public static void deliverSituation(ASTNode a, ASTNode b) { // a -> b
         b.inClass = a.inClass;

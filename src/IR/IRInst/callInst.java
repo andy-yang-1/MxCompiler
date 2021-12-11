@@ -19,7 +19,7 @@ public class callInst extends IRInst{
 
     @Override
     public String toString() { // todo call 类方法名字错误
-        StringBuilder temp_str = new StringBuilder("@" + calledFunc.funcDefNode.funcName + "(");
+        StringBuilder temp_str = new StringBuilder("@" + calledFunc.IRFunctionName + "(");
         if ( paraList.size() != 0 ){
             temp_str.append(paraList.get(0).getType().toString()).append(" ").append(paraList.get(0).toString());
         }

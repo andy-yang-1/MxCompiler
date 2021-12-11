@@ -17,6 +17,11 @@ public class arrayType extends IRType {
     } // todo array get size fail
 
     @Override
+    public boolean equals(IRType other) {
+        return other instanceof arrayType;
+    }
+
+    @Override
     public String toString() {
         return "[" + array_size.toString() + " x " + elementType.toString() + "]";
     }

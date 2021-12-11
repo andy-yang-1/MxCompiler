@@ -44,7 +44,12 @@ public class structType extends IRType{
     }
 
     @Override
+    public boolean equals(IRType other) {
+        return other instanceof structType && ((structType) other).classDefNode.className.equals(classDefNode.className);
+    }
+
+    @Override
     public String toString() {
-        return "%"+classDefNode.className;
+        return "%struct."+classDefNode.className;
     }
 }
