@@ -39,10 +39,10 @@ public class IRModule {
         // print global (without string constant)
         for ( var each : globalVariableTable.values() ){
             if ( !each.isStringConstant ) {
-                all_ir_text.append(each.toString()).append(" = global ").append(IRType.getRightType(each.singleDefNode.parType).toString()).append(" zeroinitializer\n");
+                all_ir_text.append(each.toString()).append(" = global ").append(IRType.getRightType(each.singleDefNode.parType).toString()).append(" zeroinitializer, align ").append(each.getType().getSize()).append("\n");
             }else{ // constant [12 x i8] c"hello world\00"
 
-                all_ir_text.append(each.toString()).append(" = private unnamed_addr constant [").append(String.valueOf(each.getLLVMStringSize())).append(" x i8] ").append(each.getLLVMStringConst()).append("\n");
+                all_ir_text.append(each.toString()).append(" = private unnamed_addr constant [").append(String.valueOf(each.getLLVMStringSize())).append(" x i8] ").append(each.getLLVMStringConst()).append(", align 1\n");
             }
         }
 

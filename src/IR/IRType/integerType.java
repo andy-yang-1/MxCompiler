@@ -10,7 +10,7 @@ public class integerType extends IRType{
 
     @Override
     public int getSize() {
-        return integerSize;
+        return integerSize / 8;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package IR.IRType;
 
 import IR.IROperand.IROperand;
+import IR.IROperand.integerConst;
 
 public class arrayType extends IRType {
     IROperand array_size ;
@@ -13,7 +14,7 @@ public class arrayType extends IRType {
 
     @Override
     public int getSize() {
-        return 0;
+        return ((integerConst)array_size).intVal * elementType.getSize();
     } // todo array get size fail
 
     @Override

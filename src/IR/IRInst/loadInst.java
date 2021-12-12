@@ -12,6 +12,6 @@ public class loadInst extends IRInst {
 
     @Override
     public String toString() {
-        return resultReg.toString() + " = load " + resultReg.regType.toString() + ", " + loadBasePtr.getType().toString() + " " + loadBasePtr.toString() ;
+        return resultReg.toString() + " = load " + resultReg.regType.toString() + ", " + loadBasePtr.getType().toString() + " " + loadBasePtr.toString() + ", align " + resultReg.regType.getSize() ;
     }
 }

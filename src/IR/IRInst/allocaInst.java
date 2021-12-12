@@ -11,6 +11,6 @@ public class allocaInst extends IRInst {
 
     @Override
     public String toString() {
-        return resultReg.toString() + " = alloca " + ((pointerType)resultReg.regType).pointerToType.toString();
+        return resultReg.toString() + " = alloca " + ((pointerType)resultReg.regType).pointerToType.toString() + ", align " + resultReg.regType.getSize() ;
     }
 }

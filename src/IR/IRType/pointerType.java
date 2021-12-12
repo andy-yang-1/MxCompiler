@@ -10,7 +10,7 @@ public class pointerType extends IRType{
 
     @Override
     public int getSize() {
-        return 32;
+        return 4;
     }
 
     @Override

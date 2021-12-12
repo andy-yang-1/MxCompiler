@@ -88,7 +88,7 @@ def main():
         for i in range(len(t), max_len):
             print(end = ' ')
         start = time.time()
-        if os.system('%s < ./test.mx > test.ll' % "bash ./ir.bash"):
+        if os.system('%s < ./test.mx > test.ll' % "bash ./semantic.bash"):
             print(color_red + "Compilation failed" + color_none)
             continue_fail += 1
             continue
@@ -101,7 +101,7 @@ def main():
             os.system("clang l.bc -o a.out")
             os.system("./a.out < test.in > test.out")
             if os.system('diff -B -b test.out test.ans > diff.out'):
-                print(color_red + "Wrong answer" + color_none)
+                print(color_red + t + " Wrong answer" + color_none)
                 continue
         passed += 1
         continue_fail = 0

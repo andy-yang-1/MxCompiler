@@ -40,7 +40,7 @@ public class structType extends IRType{
 
     @Override
     public int getSize() {
-        return struct_size;
+        return struct_size / 4;
     }
 
     @Override

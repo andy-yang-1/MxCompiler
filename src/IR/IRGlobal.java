@@ -23,20 +23,31 @@ public class IRGlobal extends IROperand {
         return IRType.getLeftType(singleDefNode.parType);
     }
 
-    public String getLLVMStringConst(){
+    public String getLLVMStringConst(){ // todo string constant need further thinking
         String temp_str = ((PrimaryNode)singleDefNode.expAns).primaryStr ;
         temp_str = temp_str.substring(1,temp_str.length()-1) ;
+        temp_str = temp_str.replace("\\\\","\\") ;
+        temp_str = temp_str.replace("\\n","\n") ;
+        temp_str = temp_str.replace("\\\"","\"") ;
+        temp_str = temp_str.replace("\\t","\t") ;
+        temp_str = temp_str.replace("\\0","\0") ;
         temp_str = temp_str.replace("\\","\\5C") ;
-        temp_str = temp_str.replace("\n","\\0A") ;
-        temp_str = temp_str.replace("\t","\\09") ;
-        temp_str = temp_str.replace("\"","\\22") ;
         temp_str = temp_str.replace("\0","\\00") ;
+        temp_str = temp_str.replace("\n","\\0A") ;
+        temp_str = temp_str.replace("\"","\\22") ;
+        temp_str = temp_str.replace("\t","\\09") ;
         return "c\"" + temp_str + "\\00\"" ;
     }
 
     public int getLLVMStringSize(){
         String temp_str = ((PrimaryNode)singleDefNode.expAns).primaryStr ;
-        return temp_str.length() - 1 ; // 有 \0
+        temp_str = temp_str.substring(1,temp_str.length()-1) ;
+        temp_str = temp_str.replace("\\\\","\\") ;
+        temp_str = temp_str.replace("\\n","\n") ;
+        temp_str = temp_str.replace("\\\"","\"") ;
+        temp_str = temp_str.replace("\\t","\t") ;
+        temp_str = temp_str.replace("\\0","\0") ;
+        return temp_str.length() + 1 ; // 有 \0
     }
 
     @Override

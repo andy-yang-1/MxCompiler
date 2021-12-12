@@ -472,9 +472,8 @@ public class SemanticChecker implements ASTVisitor {
                 tempNode.IR_FuncIsReturned = tempNode.trueStmt.IR_FuncIsReturned && tempNode.falseStmt.IR_FuncIsReturned ;
                 tempNode.IR_LoopIsBreaked = true ;
             }
-        }else{
-            receiveFlowControl(tempNode.trueStmt,tempNode);
         }
+        // if 若无 falseStmt 就不会出现 flow interrupted
     }
 
     @Override

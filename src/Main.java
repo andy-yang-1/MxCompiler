@@ -45,7 +45,8 @@ public class Main {
             IRBuilder irBuilder = new IRBuilder(gScope,irModule) ;
             OutputStream IRFile = new FileOutputStream("IROutput.ll") ;
             IRFile.write(irModule.toString().getBytes());
-            System.out.println("hello world");
+//            System.out.println(irModule.toString());
+//            System.out.println("hello world");
         } catch (error e){ // todo here fail to catch the error in fromStream
             System.err.println(e.toString());
             throw new RuntimeException() ;

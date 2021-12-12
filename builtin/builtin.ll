@@ -9,6 +9,19 @@ target triple = "x86_64-pc-linux-gnu"
 @.str.3 = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
 
 ; Function Attrs: noinline nounwind optnone uwtable
+define i8* @mx_malloc(i32) #0 {
+  %2 = alloca i32, align 4
+  store i32 %0, i32* %2, align 4
+  %3 = load i32, i32* %2, align 4
+  %4 = sext i32 %3 to i64
+  %5 = call noalias i8* @malloc(i64 %4) #4
+  ret i8* %5
+}
+
+; Function Attrs: nounwind
+declare noalias i8* @malloc(i64) #1
+
+; Function Attrs: noinline nounwind optnone uwtable
 define i8* @getCrossArray(i32, i32*, i32) #0 {
   %4 = alloca i8*, align 8
   %5 = alloca i32, align 4
@@ -118,9 +131,6 @@ define i8* @getCrossArray(i32, i32*, i32) #0 {
   %83 = load i8*, i8** %4, align 8
   ret i8* %83
 }
-
-; Function Attrs: nounwind
-declare noalias i8* @malloc(i64) #1
 
 ; Function Attrs: noinline nounwind optnone uwtable
 define i32 @getArraySize(i8*) #0 {

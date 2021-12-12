@@ -2,6 +2,12 @@
 #include <string.h>
 #include <stdlib.h>
 
+#define MAX_STR_SIZE 1000
+
+char* mx_malloc( int n ){
+    return (char*) malloc( n );
+}
+
 void* getCrossArray( int dim , int *sizes , int step ){
     if ( dim == step ){
         void** t = malloc((sizes[step]+1) * sizeof(void*));

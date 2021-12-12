@@ -24,6 +24,6 @@ public class getelementptrInst extends IRInst{
 
     @Override
     public String toString() {
-        return resultReg.toString() + " = getelementptr " + ((pointerType)base_ptr.getType()).pointerToType.toString() + " , " + base_ptr.getType().toString() + " " + base_ptr.toString() + " , i32 " + String.valueOf(idx1) + ", i32 " + String.valueOf(idx2) ;
+        return resultReg.toString() + " = getelementptr inbounds " + ((pointerType)base_ptr.getType()).pointerToType.toString() + " , " + base_ptr.getType().toString() + " " + base_ptr.toString() + " , i32 " + String.valueOf(idx1) + ", i32 " + String.valueOf(idx2) ;
     }
 }

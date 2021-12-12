@@ -24,6 +24,8 @@ public abstract class IRType {
     public static IRType getRightType( Type temp_type ){
         if ( temp_type.isVoid() ){
             return new voidType() ;
+        } else if (temp_type.isNull()){ // todo
+            return new pointerType(new integerType(32));
         } else if ( temp_type.isInt() ){
             return new integerType(32) ;
         } else if ( temp_type.isBool() ){

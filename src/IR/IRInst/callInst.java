@@ -3,6 +3,7 @@ package IR.IRInst;
 import IR.IRFunction;
 import IR.IROperand.IROperand;
 import IR.IROperand.IRReg;
+import IR.IRType.IRType;
 
 import java.util.ArrayList;
 
@@ -18,13 +19,16 @@ public class callInst extends IRInst{
     }
 
     @Override
-    public String toString() { // todo call 类方法名字错误
+    public String toString() { // todo null problem
         StringBuilder temp_str = new StringBuilder("@" + calledFunc.IRFunctionName + "(");
         if ( paraList.size() != 0 ){
-            temp_str.append(paraList.get(0).getType().toString()).append(" ").append(paraList.get(0).toString());
+            if ( calledFunc.funcDefNode != null )
+                temp_str.append(IRType.getRightType(calledFunc.funcDefNode.parList.get(0).parType).toString()).append(" ").append(paraList.get(0).toString());
+            else
+                temp_str.append(IRType.getRightType(calledFunc.constructorDefNode.parList.get(0).parType).toString()).append(" ").append(paraList.get(0).toString());
         }
         for ( int i = 1 ; i < paraList.size() ; i++ ){
-            temp_str.append(",").append(paraList.get(i).getType().toString()).append(" ").append(paraList.get(i).toString());
+            temp_str.append(",").append(IRType.getRightType(calledFunc.funcDefNode.parList.get(i).parType).toString()).append(" ").append(paraList.get(i).toString());
         }
         temp_str.append(")") ;
         if ( resultReg.regType.toString().equals("void") ){

@@ -2,6 +2,7 @@ package IR.IRInst;
 
 import IR.IROperand.IROperand;
 import IR.IROperand.IRReg;
+import IR.IRType.pointerType;
 
 public class storeInst extends IRInst{
     public IROperand value ;
@@ -13,6 +14,6 @@ public class storeInst extends IRInst{
 
     @Override
     public String toString() {
-        return "store " + value.getType().toString() + " " + value.toString() + ", " + pointerToMem.getType().toString() + " " + pointerToMem.toString();
+        return "store " + ((pointerType)pointerToMem.getType()).pointerToType.toString() + " " + value.toString() + ", " + pointerToMem.getType().toString() + " " + pointerToMem.toString() + ", align " + ((pointerType)pointerToMem.getType()).pointerToType.getSize() ;
     }
 }
