@@ -223,9 +223,23 @@ public class IRBuilder implements ASTVisitor {
         currentBlock = tempIRFunction.blockList.get(0) ;
         currentFunction = tempIRFunction ;
 
-
+        // collect string constant in global area
+        ArrayList<IRGlobal> globalStringList = new ArrayList<>() ;
         for ( var eachGlobal : irModule.globalVariableTable.values() ){
+            if ( eachGlobal.singleDefNode.expAns != null && !eachGlobal.isStringConstant && eachGlobal.singleDefNode.parType.isString() ){
+                globalStringList.add(eachGlobal) ;
+            }
+        }
+        for ( var eachGlobal : globalStringList ){
+            eachGlobal.singleDefNode.expAns.accept(this);
+        }
+
+        for ( var eachGlobal : irModule.globalVariableTable.values() ){ // todo avoid iterate and write collide
             if ( eachGlobal.singleDefNode.expAns != null && !eachGlobal.isStringConstant ){
+                if ( eachGlobal.singleDefNode.parType.isString() ){
+                    currentBlock.AddInst(new storeInst(eachGlobal.singleDefNode.expAns.expOperand,eachGlobal));
+                    continue;
+                }
                 eachGlobal.singleDefNode.expAns.accept(this);
                 IROperand temp_operand = eachGlobal.singleDefNode.expAns.expOperand ;
                 if ( eachGlobal.singleDefNode.expAns.isLeftValue ){
@@ -407,7 +421,7 @@ public class IRBuilder implements ASTVisitor {
 
 
         String op = tempNode.op;
-        if ( tempNode.expType.isInt() ) {
+        if ( op.equals("*") || op.equals("/") || op.equals("-") || op.equals("%") || op.equals("<<") || op.equals(">>") || op.equals("&") || op.equals("|") || op.equals("^") ) { // todo 判别类型
 
             tempNode.expr1.accept(this);
             tempNode.expr2.accept(this);
@@ -479,7 +493,7 @@ public class IRBuilder implements ASTVisitor {
                 return;
             }
         }
-        if ( tempNode.expr1.expType.isBool() && tempNode.expr2.expType.isBool() ) {
+        if ( op.equals("&&") || op.equals("||")  ) { // todo 27 (bulgarian) 56 (gcd)
 
             // ( bool , bool ) -> bool (only)
             if (op.equals("&&")) { // todo 短路求值未实现，而且对 and 用了 i1 不知道是否能工作 // todo T3
@@ -490,9 +504,13 @@ public class IRBuilder implements ASTVisitor {
                 IRBasicBlock expr1_block = currentBlock , expr2_block = new IRBasicBlock(new IRReg(currentFunction.regCnt++,"andShortcut",new labelType())) , next_block = new IRBasicBlock(new IRReg(currentFunction.regCnt++,"next_block",new labelType())) ;
                 currentFunction.allocaList.add(bool_save) ;
 
+                currentFunction.blockList.add(expr2_block) ;
+                currentFunction.blockList.add(next_block) ;
+
                 tempNode.expr1.accept(this);
                 left_operand = tempNode.expr1.expOperand ;
-                left_operand = Left_to_right_access(left_operand) ;
+                if (tempNode.expr1.isLeftValue)
+                    left_operand = Left_to_right_access(left_operand) ;
                 left_operand = Integer_size_change_access(left_operand,new integerType(8)) ;
                 currentBlock.AddInst(new storeInst(left_operand,bool_save));
                 left_operand = Integer_size_change_access(left_operand,new integerType(1)) ;
@@ -501,7 +519,8 @@ public class IRBuilder implements ASTVisitor {
                 currentBlock = expr2_block ;
                 tempNode.expr2.accept(this);
                 right_operand = tempNode.expr2.expOperand ;
-                right_operand = Left_to_right_access(right_operand) ;
+                if ( tempNode.expr2.isLeftValue )
+                    right_operand = Left_to_right_access(right_operand) ;
                 right_operand = Integer_size_change_access(right_operand,new integerType(8)) ;
                 currentBlock.AddInst(new storeInst(right_operand,bool_save));
                 currentBlock.AddInst(new brInst(next_block.blockReg));
@@ -519,9 +538,13 @@ public class IRBuilder implements ASTVisitor {
                 IRBasicBlock expr1_block = currentBlock , expr2_block = new IRBasicBlock(new IRReg(currentFunction.regCnt++,"orShortcut",new labelType())) , next_block = new IRBasicBlock(new IRReg(currentFunction.regCnt++,"next_block",new labelType())) ;
                 currentFunction.allocaList.add(bool_save) ;
 
+                currentFunction.blockList.add(expr2_block) ;
+                currentFunction.blockList.add(next_block) ;
+
                 tempNode.expr1.accept(this);
                 left_operand = tempNode.expr1.expOperand ;
-                left_operand = Left_to_right_access(left_operand) ;
+                if ( tempNode.expr1.isLeftValue )
+                    left_operand = Left_to_right_access(left_operand) ;
                 left_operand = Integer_size_change_access(left_operand,new integerType(8)) ;
                 currentBlock.AddInst(new storeInst(left_operand,bool_save));
                 left_operand = Integer_size_change_access(left_operand,new integerType(1)) ;
@@ -530,10 +553,10 @@ public class IRBuilder implements ASTVisitor {
                 currentBlock = expr2_block ;
                 tempNode.expr2.accept(this);
                 right_operand = tempNode.expr2.expOperand ;
-                right_operand = Left_to_right_access(right_operand) ;
+                if (tempNode.expr2.isLeftValue)
+                    right_operand = Left_to_right_access(right_operand) ;
                 right_operand = Integer_size_change_access(right_operand,new integerType(8)) ;
                 currentBlock.AddInst(new storeInst(right_operand,bool_save));
-                right_operand = Integer_size_change_access(right_operand,new integerType(1)) ;
                 currentBlock.AddInst(new brInst(next_block.blockReg));
 
                 currentBlock = next_block ;
@@ -707,6 +730,8 @@ public class IRBuilder implements ASTVisitor {
                 called_function = irModule.functionTable.get(tempNode.func_call.funcName) ;
             }
         } else{
+            if ( tempNode.func_call.parList.size() > tempNode.parList.size() ) // 类内调用同函数 call 方法
+                temp_list.add(Left_to_right_access(currentScope.GetRegPointerAllSearch("this"))) ;
             called_function = irModule.functionTable.get(tempNode.func_call.funcName) ;
         }
 
@@ -1008,7 +1033,7 @@ public class IRBuilder implements ASTVisitor {
 
         init_block.AddInst(new brInst(cond_head.blockReg));
         IROperand truncated_reg = Integer_size_change_access(temp_cond,new integerType(1)) ;
-        cond_head.AddInst(new brInst(body_head.blockReg,next_block.blockReg,truncated_reg));
+        tempNode.condition.finalBlock.AddInst(new brInst(body_head.blockReg,next_block.blockReg,truncated_reg));
 
         if ( !tempNode.allStmt.flowIsInterrupted() )
             tempNode.allStmt.finalBlock.AddInst(new brInst(cond_head.blockReg));
