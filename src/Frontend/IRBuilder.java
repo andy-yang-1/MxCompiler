@@ -387,7 +387,7 @@ public class IRBuilder implements ASTVisitor {
                 }
                 break ;
             case identifierType: //注意：这里 identifier 返回的全部都是指针类型，对于指针类型，作为左值维持指针，作为右值需要 load 一次
-                if ( currentScope.ContainVarAllSearch(tempNode.primaryStr) ){
+                if ( currentScope != null && currentScope.ContainVarAllSearch(tempNode.primaryStr) ){
                     tempNode.expOperand = currentScope.GetRegPointerAllSearch(tempNode.primaryStr) ;
                 }else if ( tempNode.inClass && gScope.hasSuchMember(tempNode.inClassName,  tempNode.primaryStr) ){ // 本质是 this.member 需要多一条指令
                     int ptr_idx = irModule.structTable.get(tempNode.inClassName).getMemberIdx(tempNode.primaryStr) ;
@@ -507,7 +507,7 @@ public class IRBuilder implements ASTVisitor {
                 currentFunction.blockList.add(expr2_block) ;
                 currentFunction.blockList.add(next_block) ;
 
-                tempNode.expr1.accept(this);
+                tempNode.expr1.accept(this); // current block -> expr1.final_block
                 left_operand = tempNode.expr1.expOperand ;
                 if (tempNode.expr1.isLeftValue)
                     left_operand = Left_to_right_access(left_operand) ;
@@ -995,6 +995,7 @@ public class IRBuilder implements ASTVisitor {
         if ( tempNode.conditionExpr != null ){
             init_block.AddInst(new brInst(cond_head.blockReg)); // here is right
 
+            currentBlock = tempNode.conditionExpr.finalBlock ;
             IROperand truncated_reg = Integer_size_change_access(temp_cond,new integerType(1)) ;
             tempNode.conditionExpr.finalBlock.AddInst(new brInst(body_head.blockReg,next_block.blockReg,truncated_reg));
             if ( !tempNode.allStmt.flowIsInterrupted() )
@@ -1028,10 +1029,11 @@ public class IRBuilder implements ASTVisitor {
         tempNode.loopBlock = cond_head ;
         tempNode.nextBlock = next_block ;
         loopBlockStack.push(tempNode) ;
-        tempNode.allStmt.accept(this);
+        tempNode.allStmt.accept(this); // current block -> allStmt.finalBlock
         loopBlockStack.pop() ;
 
         init_block.AddInst(new brInst(cond_head.blockReg));
+        currentBlock = tempNode.condition.finalBlock ;
         IROperand truncated_reg = Integer_size_change_access(temp_cond,new integerType(1)) ;
         tempNode.condition.finalBlock.AddInst(new brInst(body_head.blockReg,next_block.blockReg,truncated_reg));
 
@@ -1074,7 +1076,7 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(IdExprNode tempNode) {
         tempNode.expr.accept(this); // expr -> left value
-
+        tempNode.finalBlock = currentBlock ;
         if ( tempNode.func_call != null ){ // 已经有函数 只需传递左值
             tempNode.expOperand = tempNode.expr.expOperand ;
             return ;
