@@ -1,5 +1,8 @@
+import ASM.riscvModule;
 import ASTNodeType.ASTNode;
 import ASTNodeType.RootNode;
+import Backend.InstSelector;
+import Backend.NaiveAllocate;
 import Frontend.ASTBuilder;
 import Frontend.IRBuilder;
 import Frontend.SemanticChecker;
@@ -45,6 +48,13 @@ public class Main {
             IRBuilder irBuilder = new IRBuilder(gScope,irModule) ;
             OutputStream IRFile = new FileOutputStream("IROutput.ll") ;
             IRFile.write(irModule.toString().getBytes());
+
+            riscvModule asmModule = new riscvModule(irModule) ;
+            InstSelector instSelector = new InstSelector(asmModule) ;
+            NaiveAllocate naiveAllocate = new NaiveAllocate(asmModule) ;
+            OutputStream asmFile = new FileOutputStream("asmOutput.s") ;
+            asmFile.write(asmModule.toString().getBytes());
+
 //            System.out.println(irModule.toString());
 //            System.out.println("hello world");
         } catch (error e){ // todo here fail to catch the error in fromStream

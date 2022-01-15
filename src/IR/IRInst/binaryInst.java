@@ -1,5 +1,6 @@
 package IR.IRInst;
 
+import Backend.IRVisitor;
 import IR.IROperand.IROperand;
 import IR.IROperand.IRReg;
 
@@ -21,6 +22,11 @@ public class binaryInst extends IRInst {
             case xorInst: temp_str = "xor" ; break ;
         }
         return resultReg.toString() + " = " + temp_str + " " + resultReg.regType.toString() + " " + leftOperand.toString() + " , " + rightOperand.toString() ;
+    }
+
+    @Override
+    public void accept(IRVisitor vis) {
+        vis.visit(this);
     }
 
     public enum binaryToken{

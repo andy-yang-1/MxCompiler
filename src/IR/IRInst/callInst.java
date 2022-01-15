@@ -1,5 +1,6 @@
 package IR.IRInst;
 
+import Backend.IRVisitor;
 import IR.IRFunction;
 import IR.IROperand.IROperand;
 import IR.IROperand.IRReg;
@@ -37,6 +38,11 @@ public class callInst extends IRInst{
             return resultReg.toString() + " = call " + resultReg.regType.toString() + " " + temp_str.toString() ;
         }
 
+    }
+
+    @Override
+    public void accept(IRVisitor vis) {
+        vis.visit(this);
     }
     // todo 调用类方法的时候还是要到底部获得 this 指针
 

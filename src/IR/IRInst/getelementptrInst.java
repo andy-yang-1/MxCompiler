@@ -1,5 +1,6 @@
 package IR.IRInst;
 
+import Backend.IRVisitor;
 import IR.IROperand.IROperand;
 import IR.IROperand.IRReg;
 import IR.IRType.IRType;
@@ -25,5 +26,10 @@ public class getelementptrInst extends IRInst{
     @Override
     public String toString() {
         return resultReg.toString() + " = getelementptr inbounds " + ((pointerType)base_ptr.getType()).pointerToType.toString() + " , " + base_ptr.getType().toString() + " " + base_ptr.toString() + " , i32 " + String.valueOf(idx1) + ", i32 " + String.valueOf(idx2) ;
+    }
+
+    @Override
+    public void accept(IRVisitor vis) {
+        vis.visit(this);
     }
 }

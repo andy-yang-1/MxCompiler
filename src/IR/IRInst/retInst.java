@@ -1,5 +1,6 @@
 package IR.IRInst;
 
+import Backend.IRVisitor;
 import IR.IROperand.IRReg;
 
 public class retInst extends IRInst{
@@ -14,5 +15,10 @@ public class retInst extends IRInst{
         }else{
             return "ret " + resultReg.regType.toString() + " " + resultReg.toString() ;
         }
+    }
+
+    @Override
+    public void accept(IRVisitor vis) {
+        vis.visit(this);
     }
 }

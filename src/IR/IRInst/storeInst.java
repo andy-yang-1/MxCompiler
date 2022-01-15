@@ -1,5 +1,6 @@
 package IR.IRInst;
 
+import Backend.IRVisitor;
 import IR.IROperand.IROperand;
 import IR.IROperand.IRReg;
 import IR.IRType.pointerType;
@@ -15,5 +16,10 @@ public class storeInst extends IRInst{
     @Override
     public String toString() {
         return "store " + ((pointerType)pointerToMem.getType()).pointerToType.toString() + " " + value.toString() + ", " + pointerToMem.getType().toString() + " " + pointerToMem.toString() + ", align " + ((pointerType)pointerToMem.getType()).pointerToType.getSize() ;
+    }
+
+    @Override
+    public void accept(IRVisitor vis) {
+        vis.visit(this);
     }
 }

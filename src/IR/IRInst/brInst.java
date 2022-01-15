@@ -1,5 +1,6 @@
 package IR.IRInst;
 
+import Backend.IRVisitor;
 import IR.IROperand.IROperand;
 import IR.IROperand.IRReg;
 
@@ -28,5 +29,10 @@ public class brInst extends IRInst{
         }else{
             return "br i1 " + br_cond.toString() + ", label " + if_true_reg.toString() + ", label " + if_false_reg.toString() ;
         }
+    }
+
+    @Override
+    public void accept(IRVisitor vis) {
+        vis.visit(this);
     }
 }

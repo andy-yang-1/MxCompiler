@@ -219,7 +219,7 @@ public class IRBuilder implements ASTVisitor {
         tempDefNode = new FuncDefNode(new position(0,0),"globalInitialize",new Type("void",0)) ;
         tempDefNode.allStmt = new SuiteNode(new position(0,0)) ; //
         tempIRFunction = new IRFunction(tempDefNode) ;
-        tempIRFunction.blockList.add(new IRBasicBlock(new IRReg("initial_block",new labelType()))) ;
+        tempIRFunction.blockList.add(new IRBasicBlock(new IRReg(currentFunction.IRFunctionName+"_initial_block",new labelType()))) ;
         currentBlock = tempIRFunction.blockList.get(0) ;
         currentFunction = tempIRFunction ;
 
@@ -250,7 +250,7 @@ public class IRBuilder implements ASTVisitor {
                 currentBlock.AddInst(new storeInst(temp_operand,eachGlobal));
             }
         }
-        IRReg temp_reg = new IRReg("retBlock",new labelType()) ;
+        IRReg temp_reg = new IRReg(currentFunction.IRFunctionName +"_retBlock",new labelType()) ;
         tempIRFunction.retBlock = new IRBasicBlock(temp_reg) ;
         currentBlock.AddInst(new brInst(temp_reg));
         currentBlock = tempIRFunction.retBlock ;
@@ -283,10 +283,10 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(ConstructorDefNode tempNode) {
-        IRReg temp_reg = new IRReg(currentFunction.regCnt++,"block",new labelType()) ;
+        IRReg temp_reg = new IRReg(currentFunction.regCnt++,currentFunction.IRFunctionName+"_block",new labelType()) ;
         currentBlock = new IRBasicBlock(temp_reg) ;
         currentFunction.blockList.add(currentBlock) ;
-        temp_reg = new IRReg("retBlock",new labelType()) ;
+        temp_reg = new IRReg(currentFunction.IRFunctionName+"_retBlock",new labelType()) ;
         currentFunction.retBlock = new IRBasicBlock(temp_reg) ;
         // allocate this space
         tempNode.allStmt.paraShot = true ;
@@ -300,7 +300,7 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(FuncDefNode tempNode) {
         currentFunction.regCnt = tempNode.parList.size() ; // 第一个 block 的 reg_num 在参数之后
-        IRReg temp_reg = new IRReg(currentFunction.regCnt++,"block",new labelType()) , return_val = new IRReg(currentFunction.regCnt++,"return_val",IRType.getRightType(tempNode.retType)) ; ;
+        IRReg temp_reg = new IRReg(currentFunction.regCnt++,currentFunction.IRFunctionName+"_block",new labelType()) , return_val = new IRReg(currentFunction.regCnt++,"return_val",IRType.getRightType(tempNode.retType)) ; ;
         currentBlock = new IRBasicBlock(temp_reg) ;
         currentFunction.blockList.add(currentBlock) ;
         // allocate ret address
@@ -308,7 +308,7 @@ public class IRBuilder implements ASTVisitor {
         if ( !tempNode.retType.isVoid() )
             currentFunction.allocaList.add(temp_reg) ;
         currentFunction.retReg = temp_reg ;
-        currentFunction.retBlock = new IRBasicBlock(new IRReg(currentFunction.regCnt++,"retBlock", new labelType())) ;
+        currentFunction.retBlock = new IRBasicBlock(new IRReg(currentFunction.regCnt++,currentFunction.IRFunctionName+"_retBlock", new labelType())) ;
         tempNode.allStmt.accept(this);
         for ( var each : currentFunction.allocaList ){ // 将所有的 allocation 放入头部
             currentFunction.blockList.get(0).instList.add(0,new allocaInst(each)) ;
@@ -501,7 +501,7 @@ public class IRBuilder implements ASTVisitor {
 
                 IRReg bool_save = new IRReg(currentFunction.regCnt++,"bool_save",new pointerType(new integerType(8))) ;
                 temp_reg = new IRReg(currentFunction.regCnt++,"temp",new integerType(8)) ;
-                IRBasicBlock expr1_block = currentBlock , expr2_block = new IRBasicBlock(new IRReg(currentFunction.regCnt++,"andShortcut",new labelType())) , next_block = new IRBasicBlock(new IRReg(currentFunction.regCnt++,"next_block",new labelType())) ;
+                IRBasicBlock expr1_block = currentBlock , expr2_block = new IRBasicBlock(new IRReg(currentFunction.regCnt++,currentFunction.IRFunctionName+"_andShortcut",new labelType())) , next_block = new IRBasicBlock(new IRReg(currentFunction.regCnt++,currentFunction.IRFunctionName+"_next_block",new labelType())) ;
                 currentFunction.allocaList.add(bool_save) ;
 
                 currentFunction.blockList.add(expr2_block) ;
@@ -535,7 +535,7 @@ public class IRBuilder implements ASTVisitor {
 
                 IRReg bool_save = new IRReg(currentFunction.regCnt++,"bool_save",new pointerType(new integerType(8))) ;
                 temp_reg = new IRReg(currentFunction.regCnt++,"temp",new integerType(8)) ;
-                IRBasicBlock expr1_block = currentBlock , expr2_block = new IRBasicBlock(new IRReg(currentFunction.regCnt++,"orShortcut",new labelType())) , next_block = new IRBasicBlock(new IRReg(currentFunction.regCnt++,"next_block",new labelType())) ;
+                IRBasicBlock expr1_block = currentBlock , expr2_block = new IRBasicBlock(new IRReg(currentFunction.regCnt++,currentFunction.IRFunctionName+"_orShortcut",new labelType())) , next_block = new IRBasicBlock(new IRReg(currentFunction.regCnt++,currentFunction.IRFunctionName+"_next_block",new labelType())) ;
                 currentFunction.allocaList.add(bool_save) ;
 
                 currentFunction.blockList.add(expr2_block) ;
@@ -913,7 +913,7 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(IfStmtNode tempNode) { // todo Stmt Inst 一定只能塞到 final_block 里
 
-        IRBasicBlock cond_head = currentBlock , true_head = new IRBasicBlock(new IRReg(currentFunction.regCnt++,"true_block",new labelType()))  , false_head = new IRBasicBlock(new IRReg(currentFunction.regCnt++,"false_block",new labelType())) , next_block = new IRBasicBlock(new IRReg(currentFunction.regCnt++,"next_block",new labelType())) ;
+        IRBasicBlock cond_head = currentBlock , true_head = new IRBasicBlock(new IRReg(currentFunction.regCnt++,currentFunction.IRFunctionName+"_true_block",new labelType()))  , false_head = new IRBasicBlock(new IRReg(currentFunction.regCnt++,currentFunction.IRFunctionName+"_false_block",new labelType())) , next_block = new IRBasicBlock(new IRReg(currentFunction.regCnt++,currentFunction.IRFunctionName+"_next_block",new labelType())) ;
 
         tempNode.conditionExpr.accept(this);
         IROperand temp_cond = tempNode.conditionExpr.expOperand ; // currentBlock -> cond rear
@@ -962,7 +962,7 @@ public class IRBuilder implements ASTVisitor {
         }
 
         IROperand temp_cond = null ;
-        IRBasicBlock init_block = currentBlock , cond_head = new IRBasicBlock(new IRReg(currentFunction.regCnt++,"cond_block",new labelType())) , body_head = new IRBasicBlock(new IRReg(currentFunction.regCnt++,"body_block",new labelType())) , next_block = new IRBasicBlock(new IRReg(currentFunction.regCnt++,"next_block",new labelType())) ;
+        IRBasicBlock init_block = currentBlock , cond_head = new IRBasicBlock(new IRReg(currentFunction.regCnt++,currentFunction.IRFunctionName+"_cond_block",new labelType())) , body_head = new IRBasicBlock(new IRReg(currentFunction.regCnt++,currentFunction.IRFunctionName+"_body_block",new labelType())) , next_block = new IRBasicBlock(new IRReg(currentFunction.regCnt++,currentFunction.IRFunctionName+"_next_block",new labelType())) ;
         // init block here is right, since it is at the end of the statement
 
         if ( tempNode.conditionExpr != null ){
@@ -1014,7 +1014,7 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(WhileStmtNode tempNode) {
 
-        IRBasicBlock init_block = currentBlock , cond_head = new IRBasicBlock(new IRReg(currentFunction.regCnt++,"cond_block",new labelType())) , body_head = new IRBasicBlock(new IRReg(currentFunction.regCnt++,"body_block",new labelType())) , next_block = new IRBasicBlock(new IRReg(currentFunction.regCnt++,"next_block",new labelType())) ;
+        IRBasicBlock init_block = currentBlock , cond_head = new IRBasicBlock(new IRReg(currentFunction.regCnt++,currentFunction.IRFunctionName+"_cond_block",new labelType())) , body_head = new IRBasicBlock(new IRReg(currentFunction.regCnt++,currentFunction.IRFunctionName+"_body_block",new labelType())) , next_block = new IRBasicBlock(new IRReg(currentFunction.regCnt++,currentFunction.IRFunctionName+"_next_block",new labelType())) ;
 
         currentBlock = cond_head ;
         currentFunction.blockList.add(cond_head) ;

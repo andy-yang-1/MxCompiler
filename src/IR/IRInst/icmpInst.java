@@ -1,5 +1,6 @@
 package IR.IRInst;
 
+import Backend.IRVisitor;
 import IR.IROperand.IROperand;
 import IR.IROperand.IRReg;
 
@@ -21,6 +22,11 @@ public class icmpInst extends IRInst{
             case sle : temp_str = "sle" ; break;
         }
         return resultReg.toString() + " = icmp " + temp_str + " " + leftOperand.getType().toString() + " " + leftOperand.toString() + ", " + rightOperand.toString() ;
+    }
+
+    @Override
+    public void accept(IRVisitor vis) {
+        vis.visit(this);
     }
 
     public enum cmpCond{

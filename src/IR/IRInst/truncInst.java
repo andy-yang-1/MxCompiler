@@ -1,5 +1,6 @@
 package IR.IRInst;
 
+import Backend.IRVisitor;
 import IR.IROperand.IROperand;
 import IR.IROperand.IRReg;
 
@@ -13,5 +14,10 @@ public class truncInst extends IRInst {
     @Override
     public String toString() {
         return resultReg.toString() + " = trunc " + rightTruncOperand.getType().toString() + " " + rightTruncOperand.toString() + " to " + resultReg.regType.toString() ;
+    }
+
+    @Override
+    public void accept(IRVisitor vis) {
+        vis.visit(this);
     }
 }
