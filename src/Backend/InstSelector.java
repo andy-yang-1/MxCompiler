@@ -5,10 +5,7 @@ import ASM.riscvFunction;
 import ASM.riscvGlobal;
 import ASM.riscvInst.*;
 import ASM.riscvModule;
-import ASM.riscvOperand.asmImme;
-import ASM.riscvOperand.asmOperand;
-import ASM.riscvOperand.asmReg;
-import ASM.riscvOperand.physicalReg;
+import ASM.riscvOperand.*;
 import IR.IRBasicBlock;
 import IR.IRFunction;
 import IR.IRGlobal;
@@ -35,6 +32,12 @@ public class InstSelector implements IRVisitor {
     // todo 死循环未解决
 
     // todo brInst block_reg 错误未解决
+
+    // todo call function fail / offset wrong / ret void not finished
+
+    // todo ret 前 load ra
+
+    // ret 能且只能代替 jr ra
 
     public InstSelector( riscvModule tempModule ){
 
@@ -193,7 +196,7 @@ public class InstSelector implements IRVisitor {
                 temp_operand = Constant_to_Reg_access((asmImme) temp_operand) ;
             }
             asmStoreInst temp_store_inst = new asmStoreInst( new physicalReg(null, "sp"), (asmReg) temp_operand) ;
-            temp_store_inst.imme = new asmImme(8+4*i) ;
+            temp_store_inst.imme = new asmImme(20+4*i) ;
             if ( i < 8 ){
                 currentBlock.AddInst(new asmMvInst( new physicalReg(null,"a"+String.valueOf(i)), (asmReg) temp_operand));
             }
@@ -275,7 +278,11 @@ public class InstSelector implements IRVisitor {
 
     @Override
     public void visit(retInst tempInst) {
-        currentBlock.AddInst(new asmMvInst(new physicalReg(null,"a0"),new asmReg(tempInst.resultReg)));
+        if ( !tempInst.resultReg.regType.toString().equals("void") )
+            currentBlock.AddInst(new asmMvInst(new physicalReg(null,"a0"),new asmReg(tempInst.resultReg)));
+        currentBlock.AddInst(new asmLoadInst(new physicalReg(null,"ra"),new addressReg(null,4))); // lw ra, -4(s0)
+        currentBlock.AddInst(new asmMvInst(new physicalReg(null,"sp"),new physicalReg(null,"s0"))); // mv sp, s0
+        currentBlock.AddInst(new asmLoadInst(new physicalReg(null,"s0"),new addressReg(null,8))); // lw s0, -8(s0)
         currentBlock.AddInst(new asmRetInst(new asmReg(tempInst.resultReg)));
     }
 

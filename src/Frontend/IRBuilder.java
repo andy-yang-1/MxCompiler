@@ -219,7 +219,7 @@ public class IRBuilder implements ASTVisitor {
         tempDefNode = new FuncDefNode(new position(0,0),"globalInitialize",new Type("void",0)) ;
         tempDefNode.allStmt = new SuiteNode(new position(0,0)) ; //
         tempIRFunction = new IRFunction(tempDefNode) ;
-        tempIRFunction.blockList.add(new IRBasicBlock(new IRReg(currentFunction.IRFunctionName+"_initial_block",new labelType()))) ;
+        tempIRFunction.blockList.add(new IRBasicBlock(new IRReg("globalInitialize_initial_block",new labelType()))) ;
         currentBlock = tempIRFunction.blockList.get(0) ;
         currentFunction = tempIRFunction ;
 

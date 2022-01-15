@@ -21,6 +21,8 @@ public class NaiveAllocate {
     public HashSet<String> virtualRegSet ;
     public int virtualRegCounter = 0 ;
 
+    // todo address reg 合法区间为 [s0-20,sp+4]
+
     public NaiveAllocate( riscvModule temp_module ){
         asmModule = temp_module ;
         for ( var funcSet : asmModule.funcTable.entrySet() ){
@@ -37,7 +39,7 @@ public class NaiveAllocate {
                     var temp_list = tempInst.getVirtualRegs() ;
                     for ( var each : temp_list ){
                         if ( !virtualRegSet.contains(each.irReg.regName) ){
-                            offsetTable.put(each.irReg.regName,4*virtualRegCounter+8) ;
+                            offsetTable.put(each.irReg.regName,4*virtualRegCounter+20) ;
                             virtualRegSet.add(each.irReg.regName) ;
                             if ( each.irReg.regName.length() > 14 && each.irReg.regName.substring(0,14).equals("para_array_reg")){ // 处理 array 空间方法
                                 virtualRegCounter += ((pointerType)each.irReg.regType).pointerToType.getSize() / 4 ;
@@ -64,7 +66,7 @@ public class NaiveAllocate {
 
 
             var tempBlock = funcSet.getValue().blockList.get(0) ;
-            int stack_size = 4 * virtualRegCounter + 8 ;
+            int stack_size = 4 * virtualRegCounter + 20 ;
             // addi s0 , stacksize(sp)
             tempBlock.instList.add(0,new asmLiInst(new physicalReg(null,"s0"),new physicalReg(null,"sp"),new asmImme(stack_size)));
             // sw s0 , stacksize-8(sp)

@@ -25,7 +25,7 @@ declare i8 @string_eq(i8*, i8*)
 declare i8* @string_substring(i8*, i32, i32)
 
 define void @globalInitialize(){
-string_sle_initial_block:
+globalInitialize_initial_block:
 	br label %globalInitialize_retBlock
 globalInitialize_retBlock:
 	ret void
