@@ -24,7 +24,7 @@ public class asmStoreInst extends asmInst{
     public String toString() {
         String tempStr = "" ;
 
-        physicalReg tmp_rs2  ;
+        physicalReg tmp_rs2 , tmp_rs1  ;
         if ( rs2 instanceof addressReg ){
             tmp_rs2 = new physicalReg(null,"t2") ;
             tempStr += addressRegToPhysicalRs((addressReg) rs2,tmp_rs2) ;
@@ -34,16 +34,25 @@ public class asmStoreInst extends asmInst{
         }
 
         if ( imme != null ){
-            tempStr += "sw " + tmp_rs2.toString() + ", " + imme.toString() + "(" +baseRegPtr.toString() + ")" ;
+            tempStr += "sw " + tmp_rs2.toString() + ", " + imme.toString() + "(" + baseRegPtr.toString() + ")" ;
             return tempStr ;
         }
 
-        if ( baseRegPtr != null ){
-            tempStr += "sw " + tmp_rs2.toString() + ", -" + ((addressReg)baseRegPtr).offset + "(s0)" ;
-        }else{
-            tempStr += "lui t1, %hi(" + baseGlobalPtr.irGlobal.singleDefNode.parName + ")\n\t" ;
-            tempStr += "sw " + tmp_rs2.toString() + ", %lo(" + baseGlobalPtr.irGlobal.singleDefNode.parName + ")(t1)" ;
+        if ( baseRegPtr instanceof addressReg && ((addressReg) baseRegPtr).isStatic ){ // physical reg
+            tempStr += "sw " + tmp_rs2.toString() + ", -" + ((addressReg) baseRegPtr).offset + "(s0)" ;
+        }else{ // address reg
+            tmp_rs1 = new physicalReg(null,"t1") ;
+            tempStr += addressRegToPhysicalRs((addressReg) baseRegPtr,tmp_rs1) ;
+            tempStr += "\n\t" ;
+            tempStr += "sw " + tmp_rs2.toString() + ", 0(t1)" ;
         }
+
+//        if ( baseRegPtr != null ){
+//            tempStr += "sw " + tmp_rs2.toString() + ", -" + ((addressReg)baseRegPtr).offset + "(s0)" ;
+//        }else{
+//            tempStr += "lui t1, %hi(." + baseGlobalPtr.irGlobal.singleDefNode.parName + ")\n\t" ;
+//            tempStr += "sw " + tmp_rs2.toString() + ", %lo(." + baseGlobalPtr.irGlobal.singleDefNode.parName + ")(t1)" ;
+//        }
         return tempStr;
     }
     @Override

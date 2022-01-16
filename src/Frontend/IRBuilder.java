@@ -305,13 +305,13 @@ public class IRBuilder implements ASTVisitor {
         currentFunction.blockList.add(currentBlock) ;
         // allocate ret address
         temp_reg = new IRReg(currentFunction.regCnt++,"ret",IRType.getLeftType(tempNode.retType)) ; // 返回值肯定是右值，开辟的返回空间肯定是左值
-        if ( !tempNode.retType.isVoid() )
-            currentFunction.allocaList.add(temp_reg) ;
         currentFunction.retReg = temp_reg ;
         currentFunction.retBlock = new IRBasicBlock(new IRReg(currentFunction.regCnt++,currentFunction.IRFunctionName+"_retBlock", new labelType())) ;
         tempNode.allStmt.accept(this);
-        for ( var each : currentFunction.allocaList ){ // 将所有的 allocation 放入头部
-            currentFunction.blockList.get(0).instList.add(0,new allocaInst(each)) ;
+        if ( !tempNode.retType.isVoid() )
+            currentFunction.allocaList.add(temp_reg) ;
+        for ( int i = currentFunction.allocaList.size() - 1 ; i >= 0 ; i-- ){ // 将所有的 allocation 放入头部
+            currentFunction.blockList.get(0).instList.add(0,new allocaInst(currentFunction.allocaList.get(i))) ;
         }
         if ( !tempNode.retType.isVoid() ){
             currentFunction.retBlock.AddInst(new loadInst(return_val,currentFunction.retReg));
@@ -1126,11 +1126,17 @@ public class IRBuilder implements ASTVisitor {
             return ;
         }
 
-        // new A[x][y][]
-        ArrayList<IROperand> operand_list = new ArrayList<>() ;
-        IRReg para_array_reg = new IRReg(currentFunction.regCnt++,"para_array_reg",new pointerType(new arrayType(new integerConst(tempNode.exprList.size()+2),new integerType(32)))) , cnt_reg = null ;
+        // todo 静态 array 换成动态 array
 
-        currentFunction.allocaList.add(para_array_reg) ;
+        // new A[x][y][]
+        ArrayList<IROperand> operand_list = new ArrayList<>() , malloc_list = new ArrayList<>() ;
+        IRReg para_array_reg = new IRReg(currentFunction.regCnt++,"para_array_reg",new pointerType(new integerType(8))) , cnt_reg = null ;
+
+        malloc_list.add(new integerConst(tempNode.exprList.size()+2));
+        currentBlock.AddInst(new callInst(para_array_reg,irModule.functionTable.get("mx_malloc"), malloc_list));
+        para_array_reg = (IRReg) Pointer_change_access(para_array_reg,new pointerType(new arrayType(new integerConst(tempNode.exprList.size()+2),new integerType(32))));
+
+//        currentFunction.allocaList.add(para_array_reg) ;
 
         for ( int i  = 0 ;  i < tempNode.exprList.size() ; i++ ){
             ExprNode each = tempNode.exprList.get(i) ;

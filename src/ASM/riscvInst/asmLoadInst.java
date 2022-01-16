@@ -24,24 +24,32 @@ public class asmLoadInst extends asmInst{
     @Override
     public String toString() {
         String tempStr = "" ;
-        if ( imme != null ){
-            tempStr += "lw " + rd.toString() + ", " + imme.toString() + "(" + baseRegPtr.toString() + ")" ;
-            return tempStr ;
-        }
 
-        physicalReg tmp_rd  ;
+
+        physicalReg tmp_rd , tmp_rs1 ;
         if ( rd instanceof addressReg ){
             tmp_rd = new physicalReg(null,"t0") ;
         }else{
             tmp_rd = (physicalReg) rd ;
         }
 
-        if ( baseRegPtr != null ){
-            tempStr += "lw " + tmp_rd.toString() + ", -" + ((addressReg)baseRegPtr).offset + "(s0)" ;
-        }else{
-            tempStr += "lui t1 ,%hi(" + baseGlobalPtr.irGlobal.singleDefNode.parName + ")\n\t" ;
-            tempStr += "lw " + tmp_rd.toString() + ", %lo(" + baseGlobalPtr.irGlobal.singleDefNode.parName + ")(t1)" ;
+        if ( imme != null ){ // physical rs1
+            tempStr += "lw " + tmp_rd.toString() + ", " + imme.toString() + "(" + baseRegPtr.toString() + ")" ;
+        }else if ( baseRegPtr instanceof addressReg && ((addressReg) baseRegPtr).isStatic ){
+            tempStr += "lw " + tmp_rd.toString() + ", -" + ((addressReg) baseRegPtr).offset + "(s0)" ;
+        } else{ // address rs1
+            tmp_rs1 = new physicalReg(null,"t1") ;
+            tempStr += addressRegToPhysicalRs((addressReg) baseRegPtr,tmp_rs1) ;
+            tempStr += "\n\t" ;
+            tempStr += "lw " + tmp_rd.toString() + ", 0(t1)" ;
         }
+
+//        if ( baseRegPtr != null ){
+//            tempStr += "lw " + tmp_rd.toString() + ", -" + ((addressReg)baseRegPtr).offset + "(s0)" ;
+//        }else{
+//            tempStr += "lui t1 ,%hi(." + baseGlobalPtr.irGlobal.singleDefNode.parName + ")\n\t" ;
+//            tempStr += "lw " + tmp_rd.toString() + ", %lo(." + baseGlobalPtr.irGlobal.singleDefNode.parName + ")(t1)" ;
+//        }
 
         if ( rd instanceof addressReg ){
             tempStr += "\n\t" ;

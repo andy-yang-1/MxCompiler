@@ -1,5 +1,3 @@
-@temp_str1 = private unnamed_addr constant [12 x i8] c"hello world\00", align 1
-@i = global i32 zeroinitializer, align 4
 
 declare i32 @string_parseInt(i8*)
 
@@ -9,10 +7,26 @@ declare i32 @string_length(i8*)
 
 define i32 @main(){
 main_block0:
+	%a10 = alloca i32*, align 4
 	%ret2 = alloca i32, align 4
 	call void @globalInitialize()
-	%charStar5 = getelementptr inbounds [12 x i8] , [12 x i8]* @temp_str1 , i32 0, i32 0
-	call void @println(i8* %charStar5)
+	%para_array_reg4 = call i8* @mx_malloc(i32 3)
+	%pointer_change5 = bitcast i8* %para_array_reg4 to [3 x i32]*
+	%cnt_reg6 = getelementptr inbounds [3 x i32] , [3 x i32]* %pointer_change5 , i32 0, i32 1
+	store i32 10, i32* %cnt_reg6, align 4
+	%pointer_change7 = bitcast [3 x i32]* %pointer_change5 to i32*
+	%new_array8 = call i8* @getCrossArray(i32 1,i32* %pointer_change7,i32 1)
+	%pointer_change9 = bitcast i8* %new_array8 to i32*
+	store i32* %pointer_change9, i32** %a10, align 4
+	%temp11 = load i32*, i32** %a10, align 4
+	%pointer_change12 = bitcast i32* %temp11 to [100000 x i32]*
+	%temp13 = getelementptr inbounds [100000 x i32] , [100000 x i32]* %pointer_change12 , i32 0, i32 0
+	store i32 1, i32* %temp13, align 4
+	%temp15 = load i32*, i32** %a10, align 4
+	%pointer_change16 = bitcast i32* %temp15 to [100000 x i32]*
+	%temp17 = getelementptr inbounds [100000 x i32] , [100000 x i32]* %pointer_change16 , i32 0, i32 0
+	%temp18 = load i32, i32* %temp17, align 4
+	call void @printlnInt(i32 %temp18)
 	store i32 0, i32* %ret2, align 4
 	br label %main_retBlock3
 main_retBlock3:

@@ -18,6 +18,7 @@ public class NaiveAllocate {
 
     public riscvModule asmModule ;
     public HashMap<String,Integer> offsetTable ;
+    public HashMap<String,Integer> staticTable ;
     public HashSet<String> virtualRegSet ;
     public int virtualRegCounter = 0 ;
 
@@ -28,8 +29,15 @@ public class NaiveAllocate {
         for ( var funcSet : asmModule.funcTable.entrySet() ){
             if ( funcSet.getValue().blockList.size() == 0 ) continue;
             offsetTable = new HashMap<>() ;
+            staticTable = new HashMap<>() ;
             virtualRegSet = new HashSet<>() ;
             virtualRegCounter = 0 ;
+
+            // static spaces
+            for ( int i = 0 ; i < funcSet.getValue().irFunction.allocaList.size() ; i++ ){
+                staticTable.put(funcSet.getValue().irFunction.allocaList.get(i).regName,4*virtualRegCounter+20) ;
+                virtualRegCounter++ ;
+            }
 
             // get stack size
             for ( int i = 0 ; i < funcSet.getValue().blockList.size() ; i++ ){
@@ -38,14 +46,10 @@ public class NaiveAllocate {
                     asmInst tempInst = tempBlock.instList.get(j) ;
                     var temp_list = tempInst.getVirtualRegs() ;
                     for ( var each : temp_list ){
-                        if ( !virtualRegSet.contains(each.irReg.regName) ){
+                        if ( !virtualRegSet.contains(each.irReg.regName) && !staticTable.containsKey(each.irReg.regName) ){
                             offsetTable.put(each.irReg.regName,4*virtualRegCounter+20) ;
                             virtualRegSet.add(each.irReg.regName) ;
-                            if ( each.irReg.regName.length() > 14 && each.irReg.regName.substring(0,14).equals("para_array_reg")){ // 处理 array 空间方法
-                                virtualRegCounter += ((pointerType)each.irReg.regType).pointerToType.getSize() / 4 ;
-                            }else{
-                                virtualRegCounter++ ;
-                            }
+                            virtualRegCounter++ ;
                         }
                     }
                 }
@@ -58,7 +62,14 @@ public class NaiveAllocate {
                     asmInst tempInst = tempBlock.instList.get(j) ;
                     var temp_list = tempInst.getVirtualRegs() ;
                     for ( var each : temp_list ){ // todo 有的 address reg 未能被替换掉
-                        tempInst.replaceReg(each,new addressReg(each.irReg,offsetTable.get(each.irReg.regName)));
+                        if ( virtualRegSet.contains(each.irReg.regName) ){
+                            tempInst.replaceReg(each,new addressReg(each.irReg,offsetTable.get(each.irReg.regName)));
+                        }else{ // 静态空间
+                            addressReg tmp_addr_reg = new addressReg(each.irReg,staticTable.get(each.irReg.regName)) ;
+                            tmp_addr_reg.isStatic = true ;
+                            tempInst.replaceReg(each,tmp_addr_reg);
+                        }
+
                     }
                 }
             }

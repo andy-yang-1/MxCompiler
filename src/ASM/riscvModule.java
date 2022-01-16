@@ -48,7 +48,7 @@ public class riscvModule {
         for ( var eachGlobal : globalTable.values() ){
             if ( !eachGlobal.irGlobal.isStringConstant )
                 asmStr += "\t.p2align\t2\n" ;
-            asmStr +=  eachGlobal.irGlobal.singleDefNode.parName + ":\n" ;
+            asmStr += "." + eachGlobal.irGlobal.singleDefNode.parName + ":\n" ;
             if ( eachGlobal.irGlobal.isStringConstant ){
                 asmStr += "\t.asciz\t" + ((PrimaryNode)eachGlobal.irGlobal.singleDefNode.expAns).primaryStr + "\n" ;
             }else{

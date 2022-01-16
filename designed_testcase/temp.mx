@@ -1,5 +1,5 @@
-int i ;
 int main(){
-    println("hello world") ;
-    return 0 ;
+    int[] a = new int[10] ;
+    a[0] = 1 ;
+    printlnInt(a[0]) ;
 }

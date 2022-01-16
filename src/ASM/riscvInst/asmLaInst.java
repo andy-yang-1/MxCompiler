@@ -24,7 +24,7 @@ public class asmLaInst extends asmInst{
         }else{
             tmp_rd = rd ;
         }
-        tempStr += "la " + tmp_rd.toString() + ", " + label.irGlobal.singleDefNode.parName;
+        tempStr += "la " + tmp_rd.toString() + ", ." + label.irGlobal.singleDefNode.parName;
         if ( rd instanceof addressReg ){
             tempStr += "\n\t" ;
             tempStr += physicalRegToAddressRd((addressReg) rd, (physicalReg) tmp_rd) ;

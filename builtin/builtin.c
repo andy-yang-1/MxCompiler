@@ -5,7 +5,7 @@
 #define MAX_STR_SIZE 1000
 
 char* mx_malloc( int n ){
-    return (char*) malloc( n );
+    return (char*) malloc( n * 4 );
 }
 
 void* getCrossArray( int dim , int *sizes , int step ){

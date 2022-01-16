@@ -13,9 +13,10 @@ define i8* @mx_malloc(i32) #0 {
   %2 = alloca i32, align 4
   store i32 %0, i32* %2, align 4
   %3 = load i32, i32* %2, align 4
-  %4 = sext i32 %3 to i64
-  %5 = call noalias i8* @malloc(i64 %4) #4
-  ret i8* %5
+  %4 = mul nsw i32 %3, 4
+  %5 = sext i32 %4 to i64
+  %6 = call noalias i8* @malloc(i64 %5) #4
+  ret i8* %6
 }
 
 ; Function Attrs: nounwind
