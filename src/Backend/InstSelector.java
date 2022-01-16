@@ -250,23 +250,38 @@ public class InstSelector implements IRVisitor {
     @Override
     public void visit(icmpInst tempInst) {
         String temp_token = "" ;
-        switch (tempInst.cond){
-            case eq : temp_token = "eq" ; break ;
-            case ne : temp_token = "ne" ; break ;
-            case sgt : temp_token = "sgt" ; break ;
-            case sge : temp_token = "sge" ; break ;
-            case slt : temp_token = "slt" ; break ;
-            case sle : temp_token = "sle" ; break ;
-        }
+
         asmReg temp_reg = new asmReg(tempInst.resultReg) ;
-        asmOperand left_operand = getAsmOperand(tempInst.leftOperand) , right_operand = getAsmOperand(tempInst.rightOperand) ;
+        asmOperand left_operand = getAsmOperand(tempInst.leftOperand) , right_operand = getAsmOperand(tempInst.rightOperand) , temp_operand ;
         if ( left_operand instanceof asmImme ){
             left_operand = Constant_to_Reg_access((asmImme) left_operand) ;
         }
         if ( right_operand instanceof asmImme ){
             right_operand = Constant_to_Reg_access((asmImme) right_operand) ;
         }
-        currentBlock.AddInst(new asmBinaryInst(temp_reg, (asmReg) left_operand, (asmReg) right_operand,temp_token));
+        switch (tempInst.cond){
+            case eq :
+                currentBlock.AddInst(new asmBinaryInst( new physicalReg(null,"t0"), (asmReg) left_operand, (asmReg) right_operand,"sub"));
+                currentBlock.AddInst(new asmPseudoInst(temp_reg,new physicalReg(null,"t0"),"seqz"));
+                break ;
+            case ne :
+                currentBlock.AddInst(new asmBinaryInst( new physicalReg(null,"t0"), (asmReg) left_operand, (asmReg) right_operand,"sub"));
+                currentBlock.AddInst(new asmPseudoInst(temp_reg,new physicalReg(null,"t0"),"snez"));
+                break ;
+            case sgt :
+                currentBlock.AddInst(new asmBinaryInst(temp_reg, (asmReg) left_operand, (asmReg) right_operand,"sgt"));
+                break ;
+            case sge :
+                currentBlock.AddInst(new asmBinaryInst(temp_reg, (asmReg) right_operand, (asmReg) left_operand,"slt"));
+                break ;
+            case slt :
+                currentBlock.AddInst(new asmBinaryInst(temp_reg, (asmReg) left_operand, (asmReg) right_operand,"slt"));
+                break ;
+            case sle :
+                currentBlock.AddInst(new asmBinaryInst(temp_reg, (asmReg) right_operand, (asmReg) left_operand,"sgt"));
+                break ;
+        }
+
     }
 
     @Override
@@ -306,16 +321,15 @@ public class InstSelector implements IRVisitor {
 
     @Override
     public void visit(storeInst tempInst) {
-        asmOperand temp_operand = getAsmOperand(tempInst.value) ;
+        asmOperand temp_operand = getAsmOperand(tempInst.value) , temp_ptr = getAsmOperand(tempInst.pointerToMem) ;
         if ( temp_operand instanceof asmImme ){
             temp_operand = Constant_to_Reg_access((asmImme) temp_operand) ;
         }
-
-        if ( temp_operand instanceof riscvGlobal ){
-            temp_operand = Global_to_Reg_access((riscvGlobal) temp_operand) ;
+        if ( temp_ptr instanceof riscvGlobal ){
+            temp_ptr = Global_to_Reg_access((riscvGlobal) temp_ptr) ;
         }
 
-        currentBlock.AddInst(new asmStoreInst(new asmReg((IRReg) tempInst.pointerToMem), (asmReg) temp_operand));
+        currentBlock.AddInst(new asmStoreInst((asmReg) temp_ptr, (asmReg) temp_operand));
 
 //        if ( tempInst.pointerToMem instanceof IRReg ){
 //            currentBlock.AddInst(new asmStoreInst(new asmReg((IRReg) tempInst.pointerToMem), (asmReg) temp_operand));
