@@ -37,6 +37,8 @@ public class InstSelector implements IRVisitor {
 
     // todo ret 前 load ra
 
+    // todo println / array can't work
+
     // ret 能且只能代替 jr ra
 
     public InstSelector( riscvModule tempModule ){
@@ -76,6 +78,13 @@ public class InstSelector implements IRVisitor {
         IRReg temp_reg = new IRReg(currentFunction.irFunction.regCnt++,"const_change",new integerType(32)) ;
         asmReg asm_temp_reg = new asmReg(temp_reg) ;
         currentBlock.AddInst(new asmLiInst(asm_temp_reg,new physicalReg(null, "zero"),temp_imme));
+        return asm_temp_reg ;
+    }
+
+    public asmReg Global_to_Reg_access( riscvGlobal temp_global ){
+        IRReg temp_reg = new IRReg(currentFunction.irFunction.regCnt++,"global_change", temp_global.irGlobal.getType()) ;
+        asmReg asm_temp_reg = new asmReg(temp_reg) ;
+        currentBlock.AddInst(new asmLaInst(asm_temp_reg,temp_global));
         return asm_temp_reg ;
     }
 
@@ -167,7 +176,11 @@ public class InstSelector implements IRVisitor {
 
     @Override
     public void visit(bitcastInst tempInst) {
-        currentBlock.AddInst(new asmLiInst(new asmReg(tempInst.resultReg),new asmReg((IRReg) tempInst.castToOperand),new asmImme(0)));
+        asmOperand temp_operand = getAsmOperand(tempInst.castToOperand)  ;
+        if ( temp_operand instanceof riscvGlobal ){
+            temp_operand = Global_to_Reg_access((riscvGlobal) temp_operand) ;
+        }
+        currentBlock.AddInst(new asmLiInst(new asmReg(tempInst.resultReg),(asmReg) temp_operand,new asmImme(0)));
     }
 
     @Override
@@ -175,7 +188,7 @@ public class InstSelector implements IRVisitor {
         if ( tempInst.br_cond == null ){
             currentBlock.AddInst(new asmBrInst(tempInst.dest_block_reg));
         }else{
-            // todo dest_reg 的存在好像是传引用 ?
+            // todo br_cond 会有全局 / imme ?
             currentBlock.AddInst(new asmBrInst(new asmReg((IRReg) tempInst.br_cond),tempInst.if_true_reg)); // bne rs1 0 true_block
             currentBlock.AddInst(new asmBrInst(tempInst.if_false_reg)); // j false_block
         }
@@ -213,8 +226,12 @@ public class InstSelector implements IRVisitor {
 
     @Override
     public void visit(getelementptrInst tempInst) {
-        asmOperand temp_idx2 = getAsmOperand(tempInst.idx2) ;
-        asmReg temp_reg = new asmReg(tempInst.resultReg) , temp_base = new asmReg((IRReg) tempInst.base_ptr) ;
+        asmOperand temp_idx2 = getAsmOperand(tempInst.idx2) , temp_base = getAsmOperand(tempInst.base_ptr) ;
+        asmReg temp_reg = new asmReg(tempInst.resultReg)  ;
+        // todo addi here is wrong !! global not solved
+        if ( temp_base instanceof riscvGlobal ){
+            temp_base = Global_to_Reg_access((riscvGlobal) temp_base) ;
+        }
 
         // todo struct 和 array 完全一致 都是取 idx2 的值乘以 4 加上 base_ptr
             if ( temp_idx2 instanceof asmImme ){ // 需要四倍
@@ -224,7 +241,7 @@ public class InstSelector implements IRVisitor {
             asmOperand fourImme = getAsmOperand(new integerConst(4)) ;
             fourImme = Constant_to_Reg_access((asmImme) fourImme) ;
             currentBlock.AddInst(new asmBinaryInst(mulReg, (asmReg) temp_idx2, (asmReg) fourImme, "mul"));
-            currentBlock.AddInst(new asmBinaryInst(temp_reg,temp_base,mulReg, "add"));
+            currentBlock.AddInst(new asmBinaryInst(temp_reg, (asmReg) temp_base,mulReg, "add"));
 
     }
 

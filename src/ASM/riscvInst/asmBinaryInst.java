@@ -52,7 +52,7 @@ public class asmBinaryInst extends asmInst{
         }
         if ( rs2 instanceof addressReg ){
             tmp_rs2 = new physicalReg(null,"t2") ;
-            tempStr += addressRegToPhysicalRs((addressReg) rs1,tmp_rs2) ;
+            tempStr += addressRegToPhysicalRs((addressReg) rs2,tmp_rs2) ;
             tempStr += "\n\t" ;
         }else{
             tmp_rs2 = (physicalReg) rs2 ;
@@ -64,7 +64,7 @@ public class asmBinaryInst extends asmInst{
             tmp_rd = (physicalReg) rd;
         }
 
-        tempStr += riscvTokenInst + " " + rd.toString() + ", " + rs1.toString() + ", " + rs2.toString() ;
+        tempStr += riscvTokenInst + " " + tmp_rd.toString() + ", " + tmp_rs1.toString() + ", " + tmp_rs2.toString() ;
 
         if ( rd instanceof addressReg ){
             tempStr += "\n\t" ;

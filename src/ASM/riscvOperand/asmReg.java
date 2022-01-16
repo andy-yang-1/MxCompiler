@@ -10,7 +10,7 @@ public class asmReg extends asmOperand{
     }
     @Override
     public String toString(){
-        return irReg.toString() ;
+        throw new RuntimeException("replace virtual reg fail!") ;
     }
     public boolean isVirtual(){
         return !(this instanceof physicalReg) && !(this instanceof addressReg) ;

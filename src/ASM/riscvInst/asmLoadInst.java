@@ -65,7 +65,7 @@ public class asmLoadInst extends asmInst{
         if (rd.isVirtual() && rd.irReg.regName.equals(old_reg.irReg.regName) ){
             rd = new_reg ;
         }
-        if (baseRegPtr.isVirtual() && baseRegPtr.irReg.regName.equals(old_reg.irReg.regName) ){
+        if ( baseRegPtr != null && baseRegPtr.isVirtual() && baseRegPtr.irReg.regName.equals(old_reg.irReg.regName) ){
             baseRegPtr = new_reg ;
         }
     }

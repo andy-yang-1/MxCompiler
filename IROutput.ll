@@ -1,3 +1,5 @@
+@temp_str1 = private unnamed_addr constant [12 x i8] c"hello world\00", align 1
+@i = global i32 zeroinitializer, align 4
 
 declare i32 @string_parseInt(i8*)
 
@@ -9,6 +11,8 @@ define i32 @main(){
 main_block0:
 	%ret2 = alloca i32, align 4
 	call void @globalInitialize()
+	%charStar5 = getelementptr inbounds [12 x i8] , [12 x i8]* @temp_str1 , i32 0, i32 0
+	call void @println(i8* %charStar5)
 	store i32 0, i32* %ret2, align 4
 	br label %main_retBlock3
 main_retBlock3:

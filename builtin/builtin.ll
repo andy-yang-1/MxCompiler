@@ -287,14 +287,17 @@ define i8* @string_substring(i8*, i32, i32) #0 {
 ; Function Attrs: noinline nounwind optnone uwtable
 define i32 @string_parseInt(i8*) #0 {
   %2 = alloca i8*, align 8
+  %3 = alloca i32, align 4
   store i8* %0, i8** %2, align 8
-  %3 = load i8*, i8** %2, align 8
-  %4 = call i32 @atoi(i8* %3) #5
-  ret i32 %4
+  store i32 0, i32* %3, align 4
+  %4 = load i8*, i8** %2, align 8
+  %5 = call i32 (i8*, i8*, ...) @__isoc99_sscanf(i8* %4, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @.str.2, i32 0, i32 0), i32* %3) #4
+  %6 = load i32, i32* %3, align 4
+  ret i32 %6
 }
 
-; Function Attrs: nounwind readonly
-declare i32 @atoi(i8*) #3
+; Function Attrs: nounwind
+declare i32 @__isoc99_sscanf(i8*, i8*, ...) #1
 
 ; Function Attrs: noinline nounwind optnone uwtable
 define i32 @string_ord(i8*, i32) #0 {

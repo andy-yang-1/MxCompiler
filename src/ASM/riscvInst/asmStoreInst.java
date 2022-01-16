@@ -23,10 +23,6 @@ public class asmStoreInst extends asmInst{
     @Override
     public String toString() {
         String tempStr = "" ;
-        if ( imme != null ){
-            tempStr += "sw " + rs2.toString() + ", " + imme.toString() + "(" +baseRegPtr.toString() + ")" ;
-            return tempStr ;
-        }
 
         physicalReg tmp_rs2  ;
         if ( rs2 instanceof addressReg ){
@@ -36,6 +32,12 @@ public class asmStoreInst extends asmInst{
         }else{
             tmp_rs2 = (physicalReg) rs2 ;
         }
+
+        if ( imme != null ){
+            tempStr += "sw " + tmp_rs2.toString() + ", " + imme.toString() + "(" +baseRegPtr.toString() + ")" ;
+            return tempStr ;
+        }
+
         if ( baseRegPtr != null ){
             tempStr += "sw " + tmp_rs2.toString() + ", -" + ((addressReg)baseRegPtr).offset + "(s0)" ;
         }else{
@@ -57,7 +59,7 @@ public class asmStoreInst extends asmInst{
     }
     @Override
     public void replaceReg(asmReg old_reg, asmReg new_reg) {
-        if ( baseRegPtr.isVirtual() && baseRegPtr.irReg.regName.equals(old_reg.irReg.regName) ){
+        if ( baseRegPtr != null && baseRegPtr.isVirtual() && baseRegPtr.irReg.regName.equals(old_reg.irReg.regName) ){
             baseRegPtr = new_reg ;
         }
         if ( rs2.isVirtual() &&  rs2.irReg.regName.equals(old_reg.irReg.regName) ){

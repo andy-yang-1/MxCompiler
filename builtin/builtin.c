@@ -76,7 +76,9 @@ char* string_substring( char* p , int left , int right ){
 }
 
 int string_parseInt( char* p ){
-    return atoi(p) ;
+    int tmp = 0;
+    sscanf(p, "%d", &tmp);
+    return tmp;
 }
 
 int string_ord( char* p , int pos ){
