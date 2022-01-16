@@ -52,10 +52,10 @@ public class Main {
             riscvModule asmModule = new riscvModule(irModule) ;
             InstSelector instSelector = new InstSelector(asmModule) ;
             NaiveAllocate naiveAllocate = new NaiveAllocate(asmModule) ;
-//            OutputStream asmFile = new FileOutputStream("asmOutput.s") ;
-//            asmFile.write(asmModule.toString().getBytes());
+            OutputStream asmFile = new FileOutputStream("output.s") ;
+            asmFile.write(asmModule.toString().getBytes());
 
-            System.out.println(asmModule.toString());
+//            System.out.println(asmModule.toString());
 //            System.out.println("hello world");
         } catch (error e){ // todo here fail to catch the error in fromStream
             System.err.println(e.toString());
