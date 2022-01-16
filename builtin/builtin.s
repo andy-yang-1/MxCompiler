@@ -1,12 +1,7 @@
 	.file	"builtin.c"
-	.option nopic
-	.attribute arch, "rv32i2p0"
-	.attribute unaligned_access, 0
-	.attribute stack_align, 16
 	.text
 	.align	2
 	.globl	mx_malloc
-	.type	mx_malloc, @function
 mx_malloc:
 	addi	sp,sp,-32
 	sw	ra,28(sp)
@@ -14,7 +9,6 @@ mx_malloc:
 	addi	s0,sp,32
 	sw	a0,-20(s0)
 	lw	a5,-20(s0)
-	slli	a5,a5,2
 	mv	a0,a5
 	call	malloc
 	mv	a5,a0
@@ -26,7 +20,6 @@ mx_malloc:
 	.size	mx_malloc, .-mx_malloc
 	.align	2
 	.globl	getCrossArray
-	.type	getCrossArray, @function
 getCrossArray:
 	addi	sp,sp,-48
 	sw	ra,44(sp)
@@ -120,7 +113,6 @@ getCrossArray:
 	.size	getCrossArray, .-getCrossArray
 	.align	2
 	.globl	getArraySize
-	.type	getArraySize, @function
 getArraySize:
 	addi	sp,sp,-48
 	sw	s0,44(sp)
@@ -143,7 +135,6 @@ getArraySize:
 	.text
 	.align	2
 	.globl	print
-	.type	print, @function
 print:
 	addi	sp,sp,-32
 	sw	ra,28(sp)
@@ -162,7 +153,6 @@ print:
 	.size	print, .-print
 	.align	2
 	.globl	println
-	.type	println, @function
 println:
 	addi	sp,sp,-32
 	sw	ra,28(sp)
@@ -184,7 +174,6 @@ println:
 	.text
 	.align	2
 	.globl	printInt
-	.type	printInt, @function
 printInt:
 	addi	sp,sp,-32
 	sw	ra,28(sp)
@@ -208,7 +197,6 @@ printInt:
 	.text
 	.align	2
 	.globl	printlnInt
-	.type	printlnInt, @function
 printlnInt:
 	addi	sp,sp,-32
 	sw	ra,28(sp)
@@ -227,7 +215,6 @@ printlnInt:
 	.size	printlnInt, .-printlnInt
 	.align	2
 	.globl	getString
-	.type	getString, @function
 getString:
 	addi	sp,sp,-32
 	sw	ra,28(sp)
@@ -250,7 +237,6 @@ getString:
 	.size	getString, .-getString
 	.align	2
 	.globl	getInt
-	.type	getInt, @function
 getInt:
 	addi	sp,sp,-32
 	sw	ra,28(sp)
@@ -270,7 +256,6 @@ getInt:
 	.size	getInt, .-getInt
 	.align	2
 	.globl	toString
-	.type	toString, @function
 toString:
 	addi	sp,sp,-48
 	sw	ra,44(sp)
@@ -295,7 +280,6 @@ toString:
 	.size	toString, .-toString
 	.align	2
 	.globl	string_length
-	.type	string_length, @function
 string_length:
 	addi	sp,sp,-32
 	sw	ra,28(sp)
@@ -313,7 +297,6 @@ string_length:
 	.size	string_length, .-string_length
 	.align	2
 	.globl	string_substring
-	.type	string_substring, @function
 string_substring:
 	addi	sp,sp,-48
 	sw	ra,44(sp)
@@ -357,7 +340,6 @@ string_substring:
 	.size	string_substring, .-string_substring
 	.align	2
 	.globl	string_parseInt
-	.type	string_parseInt, @function
 string_parseInt:
 	addi	sp,sp,-48
 	sw	ra,44(sp)
@@ -380,7 +362,6 @@ string_parseInt:
 	.size	string_parseInt, .-string_parseInt
 	.align	2
 	.globl	string_ord
-	.type	string_ord, @function
 string_ord:
 	addi	sp,sp,-32
 	sw	s0,28(sp)
@@ -398,7 +379,6 @@ string_ord:
 	.size	string_ord, .-string_ord
 	.align	2
 	.globl	string_add
-	.type	string_add, @function
 string_add:
 	addi	sp,sp,-48
 	sw	ra,44(sp)
@@ -437,7 +417,6 @@ string_add:
 	.size	string_add, .-string_add
 	.align	2
 	.globl	string_sgt
-	.type	string_sgt, @function
 string_sgt:
 	addi	sp,sp,-32
 	sw	ra,28(sp)
@@ -459,7 +438,6 @@ string_sgt:
 	.size	string_sgt, .-string_sgt
 	.align	2
 	.globl	string_slt
-	.type	string_slt, @function
 string_slt:
 	addi	sp,sp,-32
 	sw	ra,28(sp)
@@ -481,7 +459,6 @@ string_slt:
 	.size	string_slt, .-string_slt
 	.align	2
 	.globl	string_sge
-	.type	string_sge, @function
 string_sge:
 	addi	sp,sp,-32
 	sw	ra,28(sp)
@@ -504,7 +481,6 @@ string_sge:
 	.size	string_sge, .-string_sge
 	.align	2
 	.globl	string_sle
-	.type	string_sle, @function
 string_sle:
 	addi	sp,sp,-32
 	sw	ra,28(sp)
@@ -526,7 +502,6 @@ string_sle:
 	.size	string_sle, .-string_sle
 	.align	2
 	.globl	string_eq
-	.type	string_eq, @function
 string_eq:
 	addi	sp,sp,-32
 	sw	ra,28(sp)
@@ -548,7 +523,6 @@ string_eq:
 	.size	string_eq, .-string_eq
 	.align	2
 	.globl	string_ne
-	.type	string_ne, @function
 string_ne:
 	addi	sp,sp,-32
 	sw	ra,28(sp)
@@ -567,5 +541,3 @@ string_ne:
 	lw	s0,24(sp)
 	addi	sp,sp,32
 	jr	ra
-	.size	string_ne, .-string_ne
-	.ident	"GCC: (GNU) 10.2.0"
