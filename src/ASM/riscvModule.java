@@ -16,7 +16,7 @@ public class riscvModule {
     }
 
     public String toString(){
-        String asmStr = "\t.text\n" ;
+        StringBuilder asmStr = new StringBuilder("\t.text\n");
         /*
         	    .globl	function
 	            .p2align	2
@@ -25,11 +25,11 @@ public class riscvModule {
         for ( var eachFunc : funcTable.values() ){
 
             if ( eachFunc.blockList.size() == 0 ) continue;
-            asmStr += "\t.globl\t" + eachFunc.funcName + "\n\t.p2align\t2\n" + eachFunc.funcName + ":\n" ;
+            asmStr.append("\t.globl\t").append(eachFunc.funcName).append("\n\t.p2align\t2\n").append(eachFunc.funcName).append(":\n");
             for ( var eachBlock : eachFunc.blockList ){
-                asmStr += "." + eachBlock.blockName + ":\n" ;
+                asmStr.append(".").append(eachBlock.blockName).append(":\n");
                 for ( var eachInst : eachBlock.instList ){
-                    asmStr += "\t" + eachInst.toString() + "\n" ;
+                    asmStr.append("\t").append(eachInst.toString()).append("\n");
                 }
             }
         }
@@ -44,18 +44,18 @@ public class riscvModule {
             .L.str:
 	        .asciz	"%s"
          */
-        asmStr += "\t.section\t.sdata,\"aw\",@progbits\n" ;
+        asmStr.append("\t.section\t.sdata,\"aw\",@progbits\n");
         for ( var eachGlobal : globalTable.values() ){
             if ( !eachGlobal.irGlobal.isStringConstant )
-                asmStr += "\t.p2align\t2\n" ;
-            asmStr += "." + eachGlobal.irGlobal.singleDefNode.parName + ":\n" ;
+                asmStr.append("\t.p2align\t2\n");
+            asmStr.append(".").append(eachGlobal.irGlobal.singleDefNode.parName).append(":\n");
             if ( eachGlobal.irGlobal.isStringConstant ){
-                asmStr += "\t.asciz\t" + ((PrimaryNode)eachGlobal.irGlobal.singleDefNode.expAns).primaryStr + "\n" ;
+                asmStr.append("\t.asciz\t").append(((PrimaryNode) eachGlobal.irGlobal.singleDefNode.expAns).primaryStr).append("\n");
             }else{
-                asmStr += "\t.word\t0\n" ;
+                asmStr.append("\t.word\t0\n");
             }
         }
-        return asmStr ;
+        return asmStr.toString();
     }
 
 }
