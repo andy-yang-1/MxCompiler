@@ -96,7 +96,16 @@ public class InstSelector implements IRVisitor {
 
     @Override
     public void visit(IRFunction tempFunc) {
-        for ( var eachBlock : tempFunc.blockList ){
+
+        // 避免 visit alloca 和 para store
+        currentBlock = new riscvBasicBlock(tempFunc.blockList.get(0)) ;
+        for ( int i = tempFunc.allocaList.size() + tempFunc.funcDefNode.parList.size() ; i < currentBlock.irBasicBlock.instList.size() ; i++ ){
+            currentBlock.irBasicBlock.instList.get(i).accept(this);
+        }
+        currentFunction.blockList.add(currentBlock);
+
+        for ( int i = 1 ; i < tempFunc.blockList.size() ; i++ ){
+            var eachBlock = tempFunc.blockList.get(i) ;
             currentBlock = new riscvBasicBlock(eachBlock) ;
             for ( var eachInst : eachBlock.instList ){
                 eachInst.accept(this);
