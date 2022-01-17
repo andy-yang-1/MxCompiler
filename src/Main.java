@@ -65,5 +65,6 @@ public class Main {
         }
 //        System.out.println("hello world");
         // mark: semantic passed in 10.23
+        // mark: codegen passed in 1.18
     } // todo 可以用 getText 来打印错误 // todo 到时候用 == null 和 size == 0 同时判空
 }
