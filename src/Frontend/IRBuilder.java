@@ -1055,6 +1055,10 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(ContinueStmtNode tempNode) {
+        // todo 特判 ForStmtNode 且有 step expr
+        if ( loopBlockStack.peek() instanceof ForStmtNode && ((ForStmtNode) loopBlockStack.peek()).stepExpr != null ){
+            ((ForStmtNode) loopBlockStack.peek()).stepExpr.accept(this);
+        }
         tempNode.finalBlock = currentBlock ;
         currentBlock.AddInst(new brInst(loopBlockStack.peek().loopBlock.blockReg));
     }
