@@ -281,13 +281,15 @@ public class InstSelector implements IRVisitor {
                 currentBlock.AddInst(new asmBinaryInst(temp_reg, (asmReg) left_operand, (asmReg) right_operand,"sgt"));
                 break ;
             case sge :
-                currentBlock.AddInst(new asmBinaryInst(temp_reg, (asmReg) right_operand, (asmReg) left_operand,"slt"));
+                currentBlock.AddInst(new asmBinaryInst(new physicalReg(null,"t0"), (asmReg) right_operand, (asmReg) left_operand,"slt")); // a >= b -> !(b<a)
+                currentBlock.AddInst(new asmPseudoInst(temp_reg,new physicalReg(null,"t0"),"seqz"));
                 break ;
             case slt :
                 currentBlock.AddInst(new asmBinaryInst(temp_reg, (asmReg) left_operand, (asmReg) right_operand,"slt"));
                 break ;
             case sle :
-                currentBlock.AddInst(new asmBinaryInst(temp_reg, (asmReg) right_operand, (asmReg) left_operand,"sgt"));
+                currentBlock.AddInst(new asmBinaryInst(new physicalReg(null,"t0"), (asmReg) right_operand, (asmReg) left_operand,"sgt")); // a <= b -> !(a>b)
+                currentBlock.AddInst(new asmPseudoInst(temp_reg,new physicalReg(null,"t0"),"seqz"));
                 break ;
         }
 
