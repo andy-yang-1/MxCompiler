@@ -26,7 +26,7 @@ public class asmLoadInst extends asmInst{
         String tempStr = "" ;
 
 
-        physicalReg tmp_rd , tmp_rs1 ;
+        physicalReg tmp_rd , tmp_rs1 , tmp_rs3 = new physicalReg(null,"t3") ;
         if ( rd instanceof addressReg ){
             tmp_rd = new physicalReg(null,"t0") ;
         }else{
@@ -34,22 +34,20 @@ public class asmLoadInst extends asmInst{
         }
 
         if ( imme != null ){ // physical rs1
-            tempStr += "lw " + tmp_rd.toString() + ", " + imme.toString() + "(" + baseRegPtr.toString() + ")" ;
+            tempStr += killImmediate(imme,tmp_rs3, (physicalReg) baseRegPtr,tmp_rs3) + "\n\t" ;
+            tempStr += "lw " + tmp_rd.toString() + ", 0("+ tmp_rs3.toString() + ")" ;
+//            tempStr += "lw " + tmp_rd.toString() + ", " + imme.toString() + "(" + baseRegPtr.toString() + ")" ; // lw rd imme(rs1)
         }else if ( baseRegPtr instanceof addressReg && ((addressReg) baseRegPtr).isStatic ){
-            tempStr += "lw " + tmp_rd.toString() + ", -" + ((addressReg) baseRegPtr).offset + "(s0)" ;
-        } else{ // address rs1
+            tempStr += killImmediate(new asmImme(-((addressReg) baseRegPtr).offset),tmp_rs3,new physicalReg(null,"s0"),tmp_rs3) + "\n\t" ;
+            tempStr += "lw " + tmp_rd.toString() + ", 0(" + tmp_rs3.toString() + ")" ; // lw rd -offset(s0)
+        } else{ // address rs1 && not static
             tmp_rs1 = new physicalReg(null,"t1") ;
-            tempStr += addressRegToPhysicalRs((addressReg) baseRegPtr,tmp_rs1) ;
-            tempStr += "\n\t" ;
-            tempStr += "lw " + tmp_rd.toString() + ", 0(t1)" ;
+            tempStr += addressRegToPhysicalRs((addressReg) baseRegPtr,tmp_rs1) + "\n\t" ; // lw t1 -offset(s0)
+            tempStr += "lw " + tmp_rd.toString() + ", 0(" + tmp_rs1.toString() + ")" ;
+//            tempStr += "\n\t" ;
+//            tempStr += "lw " + tmp_rd.toString() + ", 0(t1)" ;
         }
 
-//        if ( baseRegPtr != null ){
-//            tempStr += "lw " + tmp_rd.toString() + ", -" + ((addressReg)baseRegPtr).offset + "(s0)" ;
-//        }else{
-//            tempStr += "lui t1 ,%hi(." + baseGlobalPtr.irGlobal.singleDefNode.parName + ")\n\t" ;
-//            tempStr += "lw " + tmp_rd.toString() + ", %lo(." + baseGlobalPtr.irGlobal.singleDefNode.parName + ")(t1)" ;
-//        }
 
         if ( rd instanceof addressReg ){
             tempStr += "\n\t" ;
