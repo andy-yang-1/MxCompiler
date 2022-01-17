@@ -712,6 +712,12 @@ public class IRBuilder implements ASTVisitor {
         IROperand temp_operand ;
         IRReg temp_reg = new IRReg(currentFunction.regCnt++,"call",IRType.getRightType(tempNode.expType)) ;
 
+        if ( tempNode.expr instanceof NormalNewNode ){
+            tempNode.expr.accept(this);
+            tempNode.expOperand = tempNode.expr.expOperand ;
+            return ;
+        }
+
 
         if ( tempNode.expr instanceof IdExprNode ){ // 拿到指定元素的左值
             tempNode.expr.accept(this);
@@ -730,9 +736,10 @@ public class IRBuilder implements ASTVisitor {
                 called_function = irModule.functionTable.get(tempNode.func_call.funcName) ;
             }
         } else{
-            if ( tempNode.func_call.parList.size() > tempNode.parList.size() ) // 类内调用同函数 call 方法
-                temp_list.add(Left_to_right_access(currentScope.GetRegPointerAllSearch("this"))) ;
-            called_function = irModule.functionTable.get(tempNode.func_call.funcName) ;
+            // todo 没有 func_call 还有可能是 constructor
+                if ( tempNode.func_call.parList.size() > tempNode.parList.size() ) // 类内调用同函数 call 方法
+                    temp_list.add(Left_to_right_access(currentScope.GetRegPointerAllSearch("this"))) ;
+                called_function = irModule.functionTable.get(tempNode.func_call.funcName) ;
         }
 
 
@@ -1113,7 +1120,7 @@ public class IRBuilder implements ASTVisitor {
         if ( tempNode.expType.dimension == 0 ){
             ArrayList<IROperand> temp_list = new ArrayList<>() ;
             temp_reg = new IRReg(currentFunction.regCnt++,"new_obj",new pointerType(new integerType(8))) ;
-            temp_list.add(new integerConst(irModule.structTable.get(tempNode.expType.typeName).getSize())) ;
+            temp_list.add(new integerConst(irModule.structTable.get(tempNode.expType.typeName).getSize())) ; // todo 过饱和空间
             currentBlock.AddInst(new callInst(temp_reg,irModule.functionTable.get("mx_malloc"), temp_list));
             temp_reg = (IRReg) Pointer_change_access(temp_reg,IRType.getRightType(tempNode.expType));
 
