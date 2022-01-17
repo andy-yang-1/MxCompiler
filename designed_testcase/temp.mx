@@ -1,42 +1,32 @@
 /*
 Test Package: Codegen
 Author: Pikachu
-Time: 2020-02-03
+Time: 2020-02-02
 Input:
 === input ===
-8 1
-10 9 8 7 7 7 5 5
+79 35 12
 === end ===
 Output:
 === output ===
-1
+<< 23 24 25 26 27 28 29 30 31 32 33 34 (35) 36 37 38 39 40 41 42 43 44 45 46 47 >>
 === end ===
 ExitCode: 0
 InstLimit: -1
-Origin Package: Codeforces 158A #62259103
+Origin Package: Codeforces 399A #44003944
 */
-int[] a = new int[50];
-int m;
+int n;
+int p;
 int k;
 int i;
-int main()
-{
-m = getInt();
-printlnInt(m) ;
-k = getInt();
-printlnInt(k) ;
-for(i=0;i<m;i++){
-    a[i] = getInt();
-    printlnInt(a[i]) ;
-}
+int main() {
+	p = 79;
+	k = 35;
+	i = p - k ;
+	printlnInt(i) ;
+	printlnInt(p+k) ;
+	if (i<= p+k) println("true") ;
+	else println("false") ;
 
-if (a[0]>=a[k-1]) println("true1") ;
-if (a[0]>0) println("true2") ;
-if (m>0) println("true3") ;
-printlnInt(m) ;
 
-for(i=0;a[i]>=a[k-1]&&a[i] > 0&&i<m;i++)
-    printlnInt(i);
-printlnInt(i);
-//printf("%d",i);
+	return 0;
 }
