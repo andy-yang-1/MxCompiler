@@ -21,7 +21,7 @@ public class asmLiInst extends asmInst{
     @Override
     public String toString() {
         String tempStr = "";
-        physicalReg tmp_rs1 , tmp_rd ;
+        physicalReg tmp_rs1 , tmp_rs2 , tmp_rd ;
         if ( rs1 instanceof addressReg ){
             tmp_rs1 = new physicalReg(null,"t1") ;
             tempStr += addressRegToPhysicalRs((addressReg) rs1,tmp_rs1) ;
@@ -34,7 +34,10 @@ public class asmLiInst extends asmInst{
         }else{
             tmp_rd = (physicalReg) rd;
         }
-        tempStr += "addi " + tmp_rd.toString() + ", " + tmp_rs1.toString() + ", " + imme.toString() ;
+        // todo addi -> li + add 替换
+        tmp_rs2 = new physicalReg(null,"t2") ;
+        tempStr += "li " + tmp_rs2.toString() + ", " + imme.toString() + "\n\t" ;
+        tempStr += "add " + tmp_rd.toString() + ", " + tmp_rs1.toString() + ", " + tmp_rs2.toString() ;
         if ( rd instanceof addressReg ){
             tempStr += "\n\t" ;
             tempStr += physicalRegToAddressRd((addressReg) rd,tmp_rd) ;
