@@ -264,13 +264,13 @@ public class GraphColoringAllocate {
             }
 
             // settle the rest of the registers to node stack
-            while ( deletedNode.size() < nodeTable.size() ){
+            while ( deletedNode.size() < nodeTable.size() ){ // todo endless loop
 
 
                 ArrayList<GraphNode> temp_delete_list = new ArrayList<>() ;
 
                 for ( var eachNode : nodeTable.values() ){
-                    if ( !eachNode.isColored && isColorable(eachNode) ){
+                    if ( !deletedNode.contains(eachNode.nodeReg) && isColorable(eachNode) ){
                         colorStack.push(eachNode) ;
                         temp_delete_list.add(eachNode) ;
                     }
@@ -282,7 +282,7 @@ public class GraphColoringAllocate {
                 // can not find a plan
                 if ( deletedNode.size() < nodeTable.size() && temp_delete_list.isEmpty() ){
                     for ( var eachNode : nodeTable.values() ){
-                        if ( !eachNode.isColored ){
+                        if ( !deletedNode.contains(eachNode.nodeReg) ){
                             stackAllocate(eachNode);
                             deleteGraphNode(eachNode);
                             break ;
