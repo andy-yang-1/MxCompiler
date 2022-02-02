@@ -3,20 +3,16 @@
 	.p2align	2
 gcd:
 .gcd_block32:
-	li t2, -212
-	add sp, sp, t2
+	addi sp, sp, -212
 	sw ra, 208(sp)
 	sw s0, 204(sp)
-	li t2, 212
-	add s0, sp, t2
-	li t2, 0
-	add a3, zero, t2
+	addi s0, sp, 212
+	addi a3, zero, 0
 	sw a3, -148(s0)
 	j .gcd_cond_block70
 .gcd_cond_block70:
 	lw a4, -148(s0)
-	li t2, 10
-	add a3, zero, t2
+	addi a3, zero, 10
 	slt t0, a3, a4
 	seqz a3, t0
 	bne a3, zero, .gcd_body_block71
@@ -81,13 +77,11 @@ gcd:
 	add a3, a3, a4
 	lw a4, -144(s0)
 	add a4, a3, a4
-	li t2, 100
-	add a3, zero, t2
+	addi a3, zero, 100
 	rem a3, a4, a3
 	sw a3, -152(s0)
 	lw a4, -148(s0)
-	li t2, 1
-	add a3, zero, t2
+	addi a3, zero, 1
 	add a3, a4, a3
 	sw a3, -148(s0)
 	j .gcd_cond_block70
@@ -95,8 +89,7 @@ gcd:
 	lw a3, -20(s0)
 	lw a4, -24(s0)
 	rem a4, a3, a4
-	li t2, 0
-	add a3, zero, t2
+	addi a3, zero, 0
 	sub t0, a4, a3
 	seqz a3, t0
 	bne a3, zero, .gcd_true_block137
@@ -114,109 +107,77 @@ gcd:
 	sw t0, -168(s0)
 	lw t0, -152(s0)
 	sw t0, -164(s0)
-	li t2, 10
-	add a3, zero, t2
+	addi a3, zero, 10
 	mv  a0, a3
 	sw a3, -20(sp)
-	li t2, 68
-	add a3, zero, t2
+	addi a3, zero, 68
 	mv  a1, a3
 	sw a3, -24(sp)
-	li t2, 0
-	add a3, zero, t2
+	addi a3, zero, 0
 	mv  a2, a3
 	sw a3, -28(sp)
-	li t2, 2
-	add a3, zero, t2
+	addi a3, zero, 2
 	mv  a3, a3
 	sw a3, -32(sp)
-	li t2, 4
-	add a3, zero, t2
+	addi a3, zero, 4
 	mv  a4, a3
 	sw a3, -36(sp)
-	li t2, 6
-	add a3, zero, t2
+	addi a3, zero, 6
 	mv  a5, a3
 	sw a3, -40(sp)
-	li t2, 8
-	add a3, zero, t2
+	addi a3, zero, 8
 	mv  a6, a3
 	sw a3, -44(sp)
-	li t2, 10
-	add a3, zero, t2
+	addi a3, zero, 10
 	mv  a7, a3
 	sw a3, -48(sp)
-	li t2, 12
-	add a3, zero, t2
+	addi a3, zero, 12
 	sw a3, -52(sp)
-	li t2, 14
-	add a3, zero, t2
+	addi a3, zero, 14
 	sw a3, -56(sp)
-	li t2, 16
-	add a3, zero, t2
+	addi a3, zero, 16
 	sw a3, -60(sp)
-	li t2, 18
-	add a3, zero, t2
+	addi a3, zero, 18
 	sw a3, -64(sp)
-	li t2, 20
-	add a3, zero, t2
+	addi a3, zero, 20
 	sw a3, -68(sp)
-	li t2, 22
-	add a3, zero, t2
+	addi a3, zero, 22
 	sw a3, -72(sp)
-	li t2, 24
-	add a3, zero, t2
+	addi a3, zero, 24
 	sw a3, -76(sp)
-	li t2, 26
-	add a3, zero, t2
+	addi a3, zero, 26
 	sw a3, -80(sp)
-	li t2, 28
-	add a3, zero, t2
+	addi a3, zero, 28
 	sw a3, -84(sp)
-	li t2, 30
-	add a3, zero, t2
+	addi a3, zero, 30
 	sw a3, -88(sp)
-	li t2, 32
-	add a3, zero, t2
+	addi a3, zero, 32
 	sw a3, -92(sp)
-	li t2, 34
-	add a3, zero, t2
+	addi a3, zero, 34
 	sw a3, -96(sp)
-	li t2, 36
-	add a3, zero, t2
+	addi a3, zero, 36
 	sw a3, -100(sp)
-	li t2, 38
-	add a3, zero, t2
+	addi a3, zero, 38
 	sw a3, -104(sp)
-	li t2, 40
-	add a3, zero, t2
+	addi a3, zero, 40
 	sw a3, -108(sp)
-	li t2, 42
-	add a3, zero, t2
+	addi a3, zero, 42
 	sw a3, -112(sp)
-	li t2, 44
-	add a3, zero, t2
+	addi a3, zero, 44
 	sw a3, -116(sp)
-	li t2, 46
-	add a3, zero, t2
+	addi a3, zero, 46
 	sw a3, -120(sp)
-	li t2, 48
-	add a3, zero, t2
+	addi a3, zero, 48
 	sw a3, -124(sp)
-	li t2, 50
-	add a3, zero, t2
+	addi a3, zero, 50
 	sw a3, -128(sp)
-	li t2, 52
-	add a3, zero, t2
+	addi a3, zero, 52
 	sw a3, -132(sp)
-	li t2, 54
-	add a3, zero, t2
+	addi a3, zero, 54
 	sw a3, -136(sp)
-	li t2, 56
-	add a3, zero, t2
+	addi a3, zero, 56
 	sw a3, -140(sp)
-	li t2, 58
-	add a3, zero, t2
+	addi a3, zero, 58
 	sw a3, -144(sp)
 	call   gcd
 	mv  s2, a0
@@ -330,121 +291,86 @@ gcd:
 	.p2align	2
 main:
 .main_block0:
-	li t2, -24
-	add sp, sp, t2
+	addi sp, sp, -24
 	sw ra, 20(sp)
 	sw s0, 16(sp)
-	li t2, 24
-	add s0, sp, t2
+	addi s0, sp, 24
 	call   globalInitialize
-	li t2, 10
-	add a3, zero, t2
+	addi a3, zero, 10
 	mv  a0, a3
 	sw a3, -20(sp)
-	li t2, 1
-	add a3, zero, t2
+	addi a3, zero, 1
 	mv  a1, a3
 	sw a3, -24(sp)
-	li t2, 0
-	add a3, zero, t2
+	addi a3, zero, 0
 	mv  a2, a3
 	sw a3, -28(sp)
-	li t2, 2
-	add a3, zero, t2
+	addi a3, zero, 2
 	mv  a3, a3
 	sw a3, -32(sp)
-	li t2, 4
-	add a3, zero, t2
+	addi a3, zero, 4
 	mv  a4, a3
 	sw a3, -36(sp)
-	li t2, 6
-	add a3, zero, t2
+	addi a3, zero, 6
 	mv  a5, a3
 	sw a3, -40(sp)
-	li t2, 8
-	add a3, zero, t2
+	addi a3, zero, 8
 	mv  a6, a3
 	sw a3, -44(sp)
-	li t2, 10
-	add a3, zero, t2
+	addi a3, zero, 10
 	mv  a7, a3
 	sw a3, -48(sp)
-	li t2, 12
-	add a3, zero, t2
+	addi a3, zero, 12
 	sw a3, -52(sp)
-	li t2, 14
-	add a3, zero, t2
+	addi a3, zero, 14
 	sw a3, -56(sp)
-	li t2, 16
-	add a3, zero, t2
+	addi a3, zero, 16
 	sw a3, -60(sp)
-	li t2, 18
-	add a3, zero, t2
+	addi a3, zero, 18
 	sw a3, -64(sp)
-	li t2, 20
-	add a3, zero, t2
+	addi a3, zero, 20
 	sw a3, -68(sp)
-	li t2, 22
-	add a3, zero, t2
+	addi a3, zero, 22
 	sw a3, -72(sp)
-	li t2, 24
-	add a3, zero, t2
+	addi a3, zero, 24
 	sw a3, -76(sp)
-	li t2, 26
-	add a3, zero, t2
+	addi a3, zero, 26
 	sw a3, -80(sp)
-	li t2, 28
-	add a3, zero, t2
+	addi a3, zero, 28
 	sw a3, -84(sp)
-	li t2, 30
-	add a3, zero, t2
+	addi a3, zero, 30
 	sw a3, -88(sp)
-	li t2, 32
-	add a3, zero, t2
+	addi a3, zero, 32
 	sw a3, -92(sp)
-	li t2, 34
-	add a3, zero, t2
+	addi a3, zero, 34
 	sw a3, -96(sp)
-	li t2, 36
-	add a3, zero, t2
+	addi a3, zero, 36
 	sw a3, -100(sp)
-	li t2, 38
-	add a3, zero, t2
+	addi a3, zero, 38
 	sw a3, -104(sp)
-	li t2, 40
-	add a3, zero, t2
+	addi a3, zero, 40
 	sw a3, -108(sp)
-	li t2, 42
-	add a3, zero, t2
+	addi a3, zero, 42
 	sw a3, -112(sp)
-	li t2, 44
-	add a3, zero, t2
+	addi a3, zero, 44
 	sw a3, -116(sp)
-	li t2, 46
-	add a3, zero, t2
+	addi a3, zero, 46
 	sw a3, -120(sp)
-	li t2, 48
-	add a3, zero, t2
+	addi a3, zero, 48
 	sw a3, -124(sp)
-	li t2, 50
-	add a3, zero, t2
+	addi a3, zero, 50
 	sw a3, -128(sp)
-	li t2, 52
-	add a3, zero, t2
+	addi a3, zero, 52
 	sw a3, -132(sp)
-	li t2, 54
-	add a3, zero, t2
+	addi a3, zero, 54
 	sw a3, -136(sp)
-	li t2, 56
-	add a3, zero, t2
+	addi a3, zero, 56
 	sw a3, -140(sp)
-	li t2, 58
-	add a3, zero, t2
+	addi a3, zero, 58
 	sw a3, -144(sp)
 	call   gcd
 	mv  a4, a0
-	li t2, 1024
-	add a3, zero, t2
+	addi a3, zero, 1024
 	add a3, a4, a3
 	mv  a0, a3
 	sw a3, -20(sp)
@@ -453,8 +379,7 @@ main:
 	mv  a0, a3
 	sw a3, -20(sp)
 	call   println
-	li t2, 0
-	add a3, zero, t2
+	addi a3, zero, 0
 	sw a3, -20(s0)
 	j .main_retBlock3
 .main_retBlock3:
@@ -468,12 +393,10 @@ main:
 	.p2align	2
 globalInitialize:
 .globalInitialize_initial_block:
-	li t2, -20
-	add sp, sp, t2
+	addi sp, sp, -20
 	sw ra, 16(sp)
 	sw s0, 12(sp)
-	li t2, 20
-	add s0, sp, t2
+	addi s0, sp, 20
 	j .globalInitialize_retBlock
 .globalInitialize_retBlock:
 	lw ra, -4(s0)
@@ -484,12 +407,10 @@ globalInitialize:
 	.p2align	2
 gcd1:
 .gcd1_block32:
-	li t2, -208
-	add sp, sp, t2
+	addi sp, sp, -208
 	sw ra, 204(sp)
 	sw s0, 200(sp)
-	li t2, 208
-	add s0, sp, t2
+	addi s0, sp, 208
 	lw a3, -28(s0)
 	lw a4, -32(s0)
 	add a4, a3, a4
@@ -549,15 +470,13 @@ gcd1:
 	add a3, a3, a4
 	lw a4, -144(s0)
 	add a4, a3, a4
-	li t2, 100
-	add a3, zero, t2
+	addi a3, zero, 100
 	rem a3, a4, a3
 	sw a3, -148(s0)
 	lw a3, -20(s0)
 	lw a4, -24(s0)
 	rem a4, a3, a4
-	li t2, 0
-	add a3, zero, t2
+	addi a3, zero, 0
 	sub t0, a4, a3
 	seqz a3, t0
 	bne a3, zero, .gcd1_true_block129
@@ -683,12 +602,10 @@ gcd1:
 	.p2align	2
 gcd2:
 .gcd2_block32:
-	li t2, -208
-	add sp, sp, t2
+	addi sp, sp, -208
 	sw ra, 204(sp)
 	sw s0, 200(sp)
-	li t2, 208
-	add s0, sp, t2
+	addi s0, sp, 208
 	lw a3, -28(s0)
 	lw a4, -32(s0)
 	add a4, a3, a4
@@ -748,15 +665,13 @@ gcd2:
 	add a3, a3, a4
 	lw a4, -144(s0)
 	add a4, a3, a4
-	li t2, 100
-	add a3, zero, t2
+	addi a3, zero, 100
 	rem a3, a4, a3
 	sw a3, -148(s0)
 	lw a3, -20(s0)
 	lw a4, -24(s0)
 	rem a4, a3, a4
-	li t2, 0
-	add a3, zero, t2
+	addi a3, zero, 0
 	sub t0, a4, a3
 	seqz a3, t0
 	bne a3, zero, .gcd2_true_block129

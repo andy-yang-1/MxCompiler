@@ -6,6 +6,11 @@ public class asmImme extends asmOperand{
         immeVal = temp_val ;
     }
 
+    public boolean isInbound(){
+        return immeVal < 2048 && immeVal >= -2048 ;
+    }
+
+
     @Override
     public String toString() {
         return String.valueOf(immeVal);

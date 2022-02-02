@@ -35,9 +35,14 @@ public class asmLiInst extends asmInst{
             tmp_rd = (physicalReg) rd;
         }
         // todo addi -> li + add 替换
-        tmp_rs2 = new physicalReg(null,"t2") ;
-        tempStr += "li " + tmp_rs2.toString() + ", " + imme.toString() + "\n\t" ;
-        tempStr += "add " + tmp_rd.toString() + ", " + tmp_rs1.toString() + ", " + tmp_rs2.toString() ;
+        if (imme.isInbound() ){
+            tempStr += "addi " + tmp_rd.toString() + ", " + tmp_rs1.toString() + ", " + imme.toString() ;
+        }else{
+            tmp_rs2 = new physicalReg(null,"t2") ;
+            tempStr += "li " + tmp_rs2.toString() + ", " + imme.toString() + "\n\t" ;
+            tempStr += "add " + tmp_rd.toString() + ", " + tmp_rs1.toString() + ", " + tmp_rs2.toString() ;
+        }
+
         if ( rd instanceof addressReg ){
             tempStr += "\n\t" ;
             tempStr += physicalRegToAddressRd((addressReg) rd,tmp_rd) ;

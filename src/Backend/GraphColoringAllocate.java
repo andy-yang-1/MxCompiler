@@ -264,7 +264,7 @@ public class GraphColoringAllocate {
             }
 
             // settle the rest of the registers to node stack
-            while ( deletedNode.size() < nodeTable.size() ){ // todo endless loop
+            while ( deletedNode.size() < nodeTable.size() ){
 
 
                 ArrayList<GraphNode> temp_delete_list = new ArrayList<>() ;
