@@ -24,21 +24,7 @@ public class InstSelector implements IRVisitor {
     public riscvBasicBlock currentBlock ;
 
     // todo 虚拟寄存器使用记录
-
-    // todo riscvBasicBlock 名字用 functionName.blockName 来规定
-
-    // todo Inst select 需要所有指令
-
-    // todo 死循环未解决
-
-    // todo brInst block_reg 错误未解决
-
-    // todo call function fail / offset wrong / ret void not finished
-
-    // todo ret 前 load ra
-
-    // todo println / array can't work
-
+    // ret 前 load ra
     // ret 能且只能代替 jr ra
 
     public InstSelector( riscvModule tempModule ){
@@ -133,7 +119,7 @@ public class InstSelector implements IRVisitor {
 
     @Override
     public void visit(allocaInst tempInst) {
-        // todo 小心 arrayreg[3] !!!
+
     }
 
     @Override
@@ -198,7 +184,6 @@ public class InstSelector implements IRVisitor {
         if ( tempInst.br_cond == null ){
             currentBlock.AddInst(new asmBrInst(tempInst.dest_block_reg));
         }else{
-            // todo br_cond 会有全局 / imme ?
             currentBlock.AddInst(new asmBrInst(new asmReg((IRReg) tempInst.br_cond),tempInst.if_true_reg)); // bne rs1 0 true_block
             currentBlock.AddInst(new asmBrInst(tempInst.if_false_reg)); // j false_block
         }
@@ -206,8 +191,8 @@ public class InstSelector implements IRVisitor {
 
     @Override
     public void visit(callInst tempInst) {
-        // todo 采用全部溢出方法
-        // todo 全部视为 integer
+        // 采用全部溢出方法
+        // 全部视为 integer
 
         // todo call 策略: 直接存储到下一个帧中，同时 分配 a0 -> a7 (保护 builtin)
 
@@ -238,7 +223,7 @@ public class InstSelector implements IRVisitor {
     public void visit(getelementptrInst tempInst) {
         asmOperand temp_idx2 = getAsmOperand(tempInst.idx2) , temp_base = getAsmOperand(tempInst.base_ptr) ;
         asmReg temp_reg = new asmReg(tempInst.resultReg)  ;
-        // todo addi here is wrong !! global not solved
+
         if ( temp_base instanceof riscvGlobal ){
             temp_base = Global_to_Reg_access((riscvGlobal) temp_base) ;
         }
@@ -320,14 +305,13 @@ public class InstSelector implements IRVisitor {
         if ( !tempInst.resultReg.regType.toString().equals("void") )
             currentBlock.AddInst(new asmMvInst(new physicalReg(null,"a0"),new asmReg(tempInst.resultReg)));
 
-        addressReg temp_addr_reg = new addressReg(null,4) ;
-        temp_addr_reg.isStatic = true ;
-        currentBlock.AddInst(new asmLoadInst(new physicalReg(null,"ra"),temp_addr_reg)); // lw ra, -4(s0)
+        physicalReg tmp_s0 = new physicalReg(null,"s0") ;
+        asmLoadInst tmp_load = new asmLoadInst(new physicalReg(null,"ra"),tmp_s0,new asmImme(-4)) ;
+        currentBlock.AddInst(tmp_load); // lw ra, -4(s0)
         currentBlock.AddInst(new asmMvInst(new physicalReg(null,"sp"),new physicalReg(null,"s0"))); // mv sp, s0
 
-        temp_addr_reg = new addressReg(null,8) ;
-        temp_addr_reg.isStatic = true ;
-        currentBlock.AddInst(new asmLoadInst(new physicalReg(null,"s0"),temp_addr_reg)); // lw s0, -8(s0)
+        tmp_load = new asmLoadInst(tmp_s0,tmp_s0,new asmImme(-8)) ;
+        currentBlock.AddInst(tmp_load); // lw s0, -8(s0)
         currentBlock.AddInst(new asmRetInst(new asmReg(tempInst.resultReg)));
     }
 

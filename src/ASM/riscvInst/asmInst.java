@@ -3,12 +3,15 @@ package ASM.riscvInst;
 import ASM.riscvOperand.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public abstract class asmInst {
     public asmReg rd  ;
     public abstract String toString() ;
     public abstract ArrayList<asmReg> getVirtualRegs() ;
     public abstract void replaceReg( asmReg old_reg , asmReg new_reg ) ;
+
+    public HashSet<asmReg> live_in = new HashSet<>() , live_out = new HashSet<>() ; // todo for data analysis
 
     // todo rd = t0 , rs1 = t1 , rs2 = t2
 
@@ -26,6 +29,8 @@ public abstract class asmInst {
         return tempInst.toString();
     }
 
+
+    // todo kill immediate 内判断立即数范围 [-2048,2047] 并修改原立即数
     public static String killImmediate( asmImme imme , physicalReg rd , physicalReg rs1 , physicalReg rs2 ){
         // reg[rs2] = immediate
         // reg[rd] = reg[rs1] + reg[rs2]

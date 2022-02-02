@@ -1,6 +1,7 @@
 import ASM.riscvModule;
 import ASTNodeType.ASTNode;
 import ASTNodeType.RootNode;
+import Backend.GraphColoringAllocate;
 import Backend.InstSelector;
 import Backend.NaiveAllocate;
 import Frontend.ASTBuilder;
@@ -51,7 +52,8 @@ public class Main {
 
             riscvModule asmModule = new riscvModule(irModule) ;
             InstSelector instSelector = new InstSelector(asmModule) ;
-            NaiveAllocate naiveAllocate = new NaiveAllocate(asmModule) ;
+//            NaiveAllocate naiveAllocate = new NaiveAllocate(asmModule) ;
+            GraphColoringAllocate graphColoringAllocate = new GraphColoringAllocate(asmModule) ;
             OutputStream asmFile = new FileOutputStream("output.s") ;
             asmFile.write(asmModule.toString().getBytes());
 
