@@ -18,19 +18,26 @@ class GraphNode{
     public asmReg nodeReg ;
     public asmReg allocated_reg ;
     public HashSet<asmReg> linkedNodes ;
+    public HashSet<asmReg> linkedCalledNodes ; // todo caller_saved nodes which link to the specific node
+    public HashSet<asmReg> linkedNodes_counterfeit ; // graph copy
+    public HashSet<asmReg> linkedCalledNodes_counterfeit ; // graph copy
     public boolean isColored = false ;
     public boolean isMvRelated = false ;
     public int colorNum ; // todo -1 表示为 address register
     public GraphNode( asmReg temp_reg ){
         nodeReg = temp_reg ;
         linkedNodes = new HashSet<>() ;
+        linkedCalledNodes = new HashSet<>() ;
+        linkedNodes_counterfeit = new HashSet<>() ;
+        linkedCalledNodes_counterfeit = new HashSet<>() ;
     }
     public void linkTo( asmReg to_reg ){
-        if (!linkedNodes.contains(to_reg))
         linkedNodes.add(to_reg) ;
+        linkedNodes_counterfeit.add(to_reg) ;
     }
     public void remove( asmReg to_reg ){
-        linkedNodes.remove(to_reg) ;
+        linkedNodes_counterfeit.remove(to_reg) ;
+        linkedCalledNodes_counterfeit.remove(to_reg) ;
     }
     public void dye( int temp_color ){
         colorNum = temp_color ;

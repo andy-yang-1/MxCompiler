@@ -26,6 +26,7 @@ public class msaAllocate {
     public int offsetCounter = 0;
     public HashMap<String, GraphNode> nodeTable;
     public HashSet<asmReg> deletedNode;
+    public HashSet<asmReg> remainedNode ;
     public Stack<GraphNode> colorStack;
 
     public HashMap<String, riscvBasicBlock> blockNameMap;
@@ -39,10 +40,22 @@ public class msaAllocate {
     public void linkTogether(asmReg reg1, asmReg reg2) {
         nodeTable.get(reg1.irReg.regName).linkTo(reg2);
         nodeTable.get(reg2.irReg.regName).linkTo(reg1);
+        if ( calledRegSet.contains(reg1) ){
+            nodeTable.get(reg2.irReg.regName).linkedCalledNodes.add(reg1) ;
+            nodeTable.get(reg2.irReg.regName).linkedCalledNodes_counterfeit.add(reg1) ;
+        }
+        if ( calledRegSet.contains(reg2) ){
+            nodeTable.get(reg1.irReg.regName).linkedCalledNodes.add(reg2) ;
+            nodeTable.get(reg1.irReg.regName).linkedCalledNodes_counterfeit.add(reg2) ;
+        }
     }
 
     public void deleteGraphNode(GraphNode tmp_node) {
+        for ( var each_reg : tmp_node.linkedNodes_counterfeit ){
+            nodeTable.get(each_reg.irReg.regName).remove(tmp_node.nodeReg);
+        }
         deletedNode.add(tmp_node.nodeReg);
+        remainedNode.remove(tmp_node.nodeReg) ;
     }
 
     public void stackAllocate(GraphNode tmp_node) {
@@ -52,22 +65,22 @@ public class msaAllocate {
         offsetCounter++;
     }
 
-    public boolean isColorable(GraphNode tmp_node) {
+    public boolean isColorable(GraphNode tmp_node) { // todo isColorable 复杂度错误
 
         if ( !calledRegSet.contains(tmp_node.nodeReg) ){
-            if (tmp_node.linkedNodes.size() < colorTypeSize) return true;
-            int remain_cnt = tmp_node.linkedNodes.size();
-            for (var each_reg : tmp_node.linkedNodes) {
-                if (deletedNode.contains(each_reg)) remain_cnt--;
-            }
-            return remain_cnt < colorTypeSize;
+//            if (tmp_node.linkedNodes.size() < colorTypeSize) return true;
+//            int remain_cnt = tmp_node.linkedNodes.size();
+//            for (var each_reg : tmp_node.linkedNodes) {
+//                if (deletedNode.contains(each_reg)) remain_cnt--;
+//            }
+            return tmp_node.linkedNodes_counterfeit.size() < colorTypeSize;
         }else{
-            int remain_cnt = tmp_node.linkedNodes.size() , save_cnt = 0 ;
-            for (var each_reg : tmp_node.linkedNodes){
-                if (deletedNode.contains(each_reg)) remain_cnt-- ;
-                if (calledRegSet.contains(tmp_node.nodeReg)&& !deletedNode.contains(each_reg)) save_cnt++ ;
-            }
-            return remain_cnt < colorTypeSize && save_cnt < savedRegisterSize ;
+//            int remain_cnt = tmp_node.linkedNodes.size() , save_cnt = 0 ;
+//            for (var each_reg : tmp_node.linkedNodes){
+//                if (deletedNode.contains(each_reg)) remain_cnt-- ;
+//                if (calledRegSet.contains(tmp_node.nodeReg)&& !deletedNode.contains(each_reg)) save_cnt++ ;
+//            }
+            return tmp_node.linkedNodes_counterfeit.size() < colorTypeSize && tmp_node.linkedCalledNodes_counterfeit.size() < savedRegisterSize ;
         }
 
     }
@@ -123,6 +136,7 @@ public class msaAllocate {
             staticSet = new HashSet<>();
             nodeTable = new HashMap<>();
             deletedNode = new HashSet<>();
+            remainedNode = new HashSet<>() ; // todo 降低复杂度
             colorStack = new Stack<>();
             offsetCounter = 0;
 
@@ -223,8 +237,18 @@ public class msaAllocate {
                 }
             }
 
+            // allocate registers to memory whose live span is over call instruction
+            for (var eachCall : callInstSet) {
+                var temp_live_out = eachCall.live_out;
+                for (var each_reg : temp_live_out) {
+                    if ( !calledRegSet.contains(each_reg) ){
+                        calledRegSet.add(each_reg) ;
+                    }
+                }
+            }
+
             // build conflict graph
-            for (int i = 0; i < funcSet.getValue().blockList.size(); i++) {
+            for (int i = 0; i < funcSet.getValue().blockList.size(); i++) { // todo live_out 分析方法错误
                 riscvBasicBlock tempBlock = funcSet.getValue().blockList.get(i);
                 for (int j = 0; j < tempBlock.instList.size(); j++) {
                     asmInst tempInst = tempBlock.instList.get(j);
@@ -236,25 +260,31 @@ public class msaAllocate {
                             nodeTable.put(each_vr.irReg.regName, tmp_node);
                         }
                     }
-                    for (int regIdx1 = 0; regIdx1 < tmp_live_out.size(); regIdx1++) {
-                        for (int regIdx2 = 0; regIdx2 < tmp_live_out.size(); regIdx2++) {
-                            if (regIdx1 == regIdx2) continue;
-                            linkTogether(tmp_live_out.get(regIdx1), tmp_live_out.get(regIdx2));
+                    if (tempInst.rd != null && tempInst.rd.isVirtual() ){
+                        if ( !nodeTable.containsKey(tempInst.rd.irReg.regName) ){ // todo 小心 和真实的建边方法好像还是不太一样
+                            GraphNode tmp_node = new GraphNode(tempInst.rd) ;
+                            nodeTable.put(tempInst.rd.irReg.regName,tmp_node) ;
                         }
-                    }
+                        for ( var each_vr : tmp_live_out ){
+                            if ( !tempInst.rd.equals(each_vr) ){
+                                linkTogether(tempInst.rd,each_vr);
+                            }
+                        }
+                    }  // todo fix the analysis
+
+//                    for (int regIdx1 = 0; regIdx1 < tmp_live_out.size(); regIdx1++) {
+//                        for (int regIdx2 = 0; regIdx2 < tmp_live_out.size(); regIdx2++) {
+//                            if (regIdx1 == regIdx2) continue;
+//                            linkTogether(tmp_live_out.get(regIdx1), tmp_live_out.get(regIdx2));
+//                        }
+//                    }
                 }
             }
 
             // color the graph
 
-            // allocate registers to memory whose live span is over call instruction // todo not distinguish saved register at first (s1->s11)
-            for (var eachCall : callInstSet) {
-                var temp_live_out = eachCall.live_out;
-                for (var each_reg : temp_live_out) {
-                    if ( !calledRegSet.contains(each_reg) ){
-                        calledRegSet.add(each_reg) ;
-                    }
-                }
+            for ( var eachNode : nodeTable.values() ){
+                remainedNode.add(eachNode.nodeReg) ;
             }
 
 
@@ -262,27 +292,45 @@ public class msaAllocate {
             while ( deletedNode.size() < nodeTable.size() ){
 
 
-                ArrayList<GraphNode> temp_delete_list = new ArrayList<>() ;
+//                ArrayList<GraphNode> temp_delete_list = new ArrayList<>() ;
 
-                for ( var eachNode : nodeTable.values() ){
-                    if ( !deletedNode.contains(eachNode.nodeReg) && isColorable(eachNode) ){
-                        colorStack.push(eachNode) ;
-                        temp_delete_list.add(eachNode) ;
+                var tmp_iterator = remainedNode.iterator() ;
+                while (tmp_iterator.hasNext()){
+                    var it = tmp_iterator.next() ;
+                    GraphNode tmp_node = nodeTable.get(it.irReg.regName) ;
+                    if ( isColorable(tmp_node) ){
+                        colorStack.push(tmp_node) ;
+                        deleteGraphNode(tmp_node) ;
+                        break ;
                     }
                 }
-                for ( var eachNode : temp_delete_list ){
-                    deleteGraphNode(eachNode);
-                }
+
+//                for ( var eachReg : remainedNode ){
+//                    GraphNode tmp_node = nodeTable.get(eachReg.irReg.regName) ;
+//                    if ( isColorable(tmp_node) ){
+//                        colorStack.push(tmp_node) ;
+//                        temp_delete = tmp_node ;
+//                        deleteGraphNode(tmp_node);
+//                        break ;
+//                    }
+//                }
+//                for ( var eachNode : temp_delete_list ){
+//                    deleteGraphNode(eachNode);
+//                }
+
 
                 // can not find a plan
-                if ( deletedNode.size() < nodeTable.size() && temp_delete_list.isEmpty() ){
-                    for ( var eachNode : nodeTable.values() ){
-                        if ( !deletedNode.contains(eachNode.nodeReg) ){
-                            stackAllocate(eachNode);
-                            deleteGraphNode(eachNode);
-                            break ;
-                        }
-                    }
+                if ( deletedNode.size() < nodeTable.size() && !tmp_iterator.hasNext() ){ // todo 复杂度错误
+                    var tmpReg = remainedNode.iterator().next() ;
+                    stackAllocate(nodeTable.get(tmpReg.irReg.regName));
+                    deleteGraphNode(nodeTable.get(tmpReg.irReg.regName));
+//                    for ( var eachNode : nodeTable.values() ){
+//                        if ( !deletedNode.contains(eachNode.nodeReg) ){
+//                            stackAllocate(eachNode);
+//                            deleteGraphNode(eachNode);
+//                            break ;
+//                        }
+//                    }
                 }
 
             }
@@ -301,7 +349,7 @@ public class msaAllocate {
                     var temp_vr_list = tempInst.getVirtualRegs() ;
                     for ( var temp_vr : temp_vr_list ){
                         tempInst.replaceReg(temp_vr,nodeTable.get(temp_vr.irReg.regName).allocated_reg);
-                    } // todo pointer_change11 null ptr problem
+                    }
                 }
             }
 
