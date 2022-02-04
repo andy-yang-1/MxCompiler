@@ -45,7 +45,15 @@ public class asmStoreInst extends asmInst{
 
         if ( imme != null ){
 //            tempStr += killImmediate(imme,tmp_rs1, (physicalReg) baseRegPtr,tmp_rs1) + "\n\t" ;
-            tempStr += "sw " + tmp_rs2.toString() + ", " + imme.toString() + "(" + tmp_rs1.toString() + ")" ;
+            if (imme.isInbound()){
+                tempStr += "sw " + tmp_rs2.toString() + ", " + imme.toString() + "(" + tmp_rs1.toString() + ")" ;
+            }else{ // sw t2 imme(t1) == addi t3, t1, imme +  \n\t  + sw t2, 0(t3)
+                physicalReg tmp_t3 = new physicalReg(null,"t3") ;
+                asmLiInst tmp_addi_inst = new asmLiInst(tmp_t3,tmp_rs1,imme) ;
+                tempStr += tmp_addi_inst.toString() + "\n\t" ;
+                tempStr += "sw " + tmp_rs2.toString() + ", 0(" + tmp_t3.toString() + ")" ;
+            }
+
 //            return tempStr ;
         }else{ // imme == 0
 //            tmp_rs1 = new physicalReg(null,"t1") ;

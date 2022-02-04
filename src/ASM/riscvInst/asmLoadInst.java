@@ -46,7 +46,14 @@ public class asmLoadInst extends asmInst{
         if ( imme != null ){ // physical rs1
 //            tempStr += killImmediate(imme,tmp_rs3, (physicalReg) baseRegPtr,tmp_rs3) + "\n\t" ;
 //            tempStr += "lw " + tmp_rd.toString() + ", 0("+ tmp_rs3.toString() + ")" ;
-            tempStr += "lw " + tmp_rd.toString() + ", " + imme.toString() + "(" + tmp_rs1.toString() + ")" ; // lw rd imme(rs1)
+            if ( imme.isInbound() ){
+                tempStr += "lw " + tmp_rd.toString() + ", " + imme.toString() + "(" + tmp_rs1.toString() + ")" ; // lw rd imme(rs1)
+            }else{ // lw t0 , imme(t1) == addi t3, t1 , imme + "\n\t" + lw t0 , 0(t3)
+                asmLiInst temp_addi_inst = new asmLiInst(tmp_rs3,tmp_rs1,imme) ;
+                tempStr += temp_addi_inst.toString() + "\n\t" ;
+                tempStr += "lw " + tmp_rd.toString() + ", 0(" + tmp_rs3.toString() + ")" ;
+            }
+
         }else{ // imme == 0
 //            tmp_rs1 = new physicalReg(null,"t1") ;
 //            tempStr += addressRegToPhysicalRs((addressReg) baseRegPtr,tmp_rs1) + "\n\t" ; // lw t1 -offset(s0)

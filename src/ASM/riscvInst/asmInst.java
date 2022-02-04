@@ -30,7 +30,7 @@ public abstract class asmInst {
     }
 
 
-    // todo kill immediate 内判断立即数范围 [-2048,2047] 并修改原立即数
+    // todo kill immediate 内判断立即数范围 [-2048,2047] 并修改原立即数 // todo
     public static String killImmediate( asmImme imme , physicalReg rd , physicalReg rs1 , physicalReg rs2 ){
         // reg[rs2] = immediate
         // reg[rd] = reg[rs1] + reg[rs2]
