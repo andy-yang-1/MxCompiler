@@ -4,6 +4,7 @@ import ASTNodeType.RootNode;
 import Backend.GraphColoringAllocate;
 import Backend.InstSelector;
 import Backend.NaiveAllocate;
+import Backend.msaAllocate;
 import Frontend.ASTBuilder;
 import Frontend.IRBuilder;
 import Frontend.SemanticChecker;
@@ -53,7 +54,8 @@ public class Main {
             riscvModule asmModule = new riscvModule(irModule) ;
             InstSelector instSelector = new InstSelector(asmModule) ;
 //            NaiveAllocate naiveAllocate = new NaiveAllocate(asmModule) ;
-            GraphColoringAllocate graphColoringAllocate = new GraphColoringAllocate(asmModule) ;
+//            GraphColoringAllocate graphColoringAllocate = new GraphColoringAllocate(asmModule) ;
+            msaAllocate notSSAAllocate = new msaAllocate(asmModule) ;
             OutputStream asmFile = new FileOutputStream("output.s") ;
             asmFile.write(asmModule.toString().getBytes());
 

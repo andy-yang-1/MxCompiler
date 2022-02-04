@@ -27,6 +27,8 @@ public class InstSelector implements IRVisitor {
     // ret 前 load ra
     // ret 能且只能代替 jr ra
 
+    // todo store / load 静态空间用虚拟寄存器处理()
+
     public InstSelector( riscvModule tempModule ){
 
         asmModule = tempModule ;
@@ -176,7 +178,7 @@ public class InstSelector implements IRVisitor {
         if ( temp_operand instanceof riscvGlobal ){
             temp_operand = Global_to_Reg_access((riscvGlobal) temp_operand) ;
         }
-        currentBlock.AddInst(new asmLiInst(new asmReg(tempInst.resultReg),(asmReg) temp_operand,new asmImme(0)));
+        currentBlock.AddInst(new asmMvInst(new asmReg(tempInst.resultReg),(asmReg) temp_operand));
     }
 
     @Override
@@ -237,7 +239,7 @@ public class InstSelector implements IRVisitor {
             fourImme = Constant_to_Reg_access((asmImme) fourImme) ;
             currentBlock.AddInst(new asmBinaryInst(mulReg, (asmReg) temp_idx2, (asmReg) fourImme, "mul"));
 
-            // todo 对于 temp_base 为 para_array_reg 中间插入 addi
+            // todo 用位运算代替 *4 运算
             currentBlock.AddInst(new asmBinaryInst(temp_reg, (asmReg) temp_base,mulReg, "add"));
 
     }
@@ -254,6 +256,8 @@ public class InstSelector implements IRVisitor {
         if ( right_operand instanceof asmImme ){
             right_operand = Constant_to_Reg_access((asmImme) right_operand) ;
         }
+
+        // todo 此处 physical register 最好换成 virtual register 这样可以随意染色
         switch (tempInst.cond){
             case eq :
                 currentBlock.AddInst(new asmBinaryInst( new physicalReg(null,"t0"), (asmReg) left_operand, (asmReg) right_operand,"sub"));
@@ -303,10 +307,10 @@ public class InstSelector implements IRVisitor {
     @Override
     public void visit(retInst tempInst) {
         if ( !tempInst.resultReg.regType.toString().equals("void") )
-            currentBlock.AddInst(new asmMvInst(new physicalReg(null,"a0"),new asmReg(tempInst.resultReg)));
+            currentBlock.AddInst(new asmMvInst(new physicalReg(null,"a0"),new asmReg(tempInst.resultReg))); // mv a0 %ret
 
         physicalReg tmp_s0 = new physicalReg(null,"s0") ;
-        asmLoadInst tmp_load = new asmLoadInst(new physicalReg(null,"ra"),tmp_s0,new asmImme(-4)) ;
+        asmLoadInst tmp_load = new asmLoadInst(new physicalReg(null,"ra"),tmp_s0,new asmImme(-4)) ; // lw ra -4(s0)
         currentBlock.AddInst(tmp_load); // lw ra, -4(s0)
         currentBlock.AddInst(new asmMvInst(new physicalReg(null,"sp"),new physicalReg(null,"s0"))); // mv sp, s0
 
@@ -336,11 +340,11 @@ public class InstSelector implements IRVisitor {
 
     @Override
     public void visit(truncInst tempInst) {
-        currentBlock.AddInst(new asmLiInst(new asmReg(tempInst.resultReg),new asmReg((IRReg) tempInst.rightTruncOperand),new asmImme(0)));
+        currentBlock.AddInst(new asmMvInst(new asmReg(tempInst.resultReg),new asmReg((IRReg) tempInst.rightTruncOperand)));
     }
 
     @Override
     public void visit(zextInst tempInst) {
-        currentBlock.AddInst(new asmLiInst(new asmReg(tempInst.resultReg),new asmReg((IRReg) tempInst.rightZextOperand),new asmImme(0)));
+        currentBlock.AddInst(new asmMvInst(new asmReg(tempInst.resultReg),new asmReg((IRReg) tempInst.rightZextOperand)));
     }
 }

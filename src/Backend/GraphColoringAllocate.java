@@ -19,6 +19,7 @@ class GraphNode{
     public asmReg allocated_reg ;
     public HashSet<asmReg> linkedNodes ;
     public boolean isColored = false ;
+    public boolean isMvRelated = false ;
     public int colorNum ; // todo -1 表示为 address register
     public GraphNode( asmReg temp_reg ){
         nodeReg = temp_reg ;
@@ -46,6 +47,8 @@ public class GraphColoringAllocate {
     // todo (sp s0 ra t0 t1 t2 t3) cannot be allocated (x9->x31\x28 allocate anyway)
     // todo virtual register whose live span over function call can only allocate s0 -> s11
 
+    // todo add mvRelated feature to enable coalesce
+
     public riscvModule asmModule ;
     public HashMap<String,Integer> offsetTable ;
     public HashMap<String,Integer> staticTable ;
@@ -56,11 +59,12 @@ public class GraphColoringAllocate {
 
     public HashMap<String, riscvBasicBlock> blockNameMap ;
     public HashSet<asmCallInst> callInstSet ;
+    public HashSet<asmMvInst> mvInstSet ;
 
 
     public static String[] allPhysicalReg =  new String[]{
-            "zero" , "ra" , "sp" , "gp" , "tp" , "t0" , "t1" , "t2" , "t3" , "s0" , "a0" , "a1" , "a2" , "a3" , "a4" , "a5" , "a6" , "a7" , "s1" , "s2" , "s3" , "s4" , "s5" , "s6" , "s7" , "s8" , "s9" , "s10" , "s11"  , "t4" , "t5" , "t6"
-    }; // todo x13 -> x31 可以任意分配
+            "zero" , "ra" , "sp" , "gp" , "tp" , "t0" , "t1" , "t2" , "t3" , "s0" , "a0" , "a1" , "a2" , "t4" , "t5" , "t6" , "a3" , "a4" , "a5" , "a6" , "a7" , "s1" , "s2" , "s3" , "s4" , "s5" , "s6" , "s7" , "s8" , "s9" , "s10" , "s11"
+    }; // todo x13 -> x31 可以任意分配 // todo x21 -> x31 saved register 保护式分配
 
     public static int colorTypeSize = 19 ;
 
@@ -111,11 +115,14 @@ public class GraphColoringAllocate {
     public void funcPreProcess( riscvFunction tempFunction ){
         blockNameMap = new HashMap<>() ;
         callInstSet = new HashSet<>() ;
+        mvInstSet = new HashSet<>() ;
         for ( var eachBlock : tempFunction.blockList ){
             blockNameMap.put(eachBlock.blockName,eachBlock) ;
             for ( var eachInst : eachBlock.instList ){
                 if ( eachInst instanceof asmCallInst )
                     callInstSet.add((asmCallInst) eachInst) ;
+                if ( eachInst instanceof asmMvInst )
+                    mvInstSet.add((asmMvInst) eachInst) ;
             }
         }
     }
@@ -160,19 +167,11 @@ public class GraphColoringAllocate {
             while (!analysis_is_completed){
                 analysis_is_completed = true ;
 
-                // todo live_in & live_out analyze fail
-
                 // 倒序求解方程
                 for ( int i = funcSet.getValue().blockList.size() -1 ; i >= 0 ; i-- ){
                     var tempBlock = funcSet.getValue().blockList.get(i) ;
                     for ( int j = tempBlock.instList.size() - 1 ; j >= 0 ; j-- ){
                         var tempInst = tempBlock.instList.get(j) ;
-
-                        // todo debug
-
-//                        if (tempInst.rd != null && tempInst.rd.irReg != null && tempInst.rd.irReg.regName.equals("temp4")) {
-//                            System.out.println("error");
-//                        }
 
                         // branch inst get successor from the target block
                         if ( tempInst instanceof asmBrInst){
@@ -180,9 +179,6 @@ public class GraphColoringAllocate {
                             var nxt_live_in = nxt_block_inst.live_in ;
                             for ( var each_reg : nxt_live_in ){
                                 if ( !tempInst.live_out.contains(each_reg) ){
-
-                                    // todo 理解错误 hashset GG
-
                                     analysis_is_completed = false ;
                                     tempInst.live_out.add(each_reg) ;
                                 }
@@ -201,7 +197,6 @@ public class GraphColoringAllocate {
                             }
                         }
 
-                        // todo 对于 HashSet 理解错误
 
                         // def == virtual result register (rd)
                         var temp_use = tempInst.getVirtualRegs() ;
@@ -257,9 +252,20 @@ public class GraphColoringAllocate {
             for ( var eachCall : callInstSet ){
                 var temp_live_out = eachCall.live_out ;
                 for ( var each_reg : temp_live_out ){
-                    var tmp_node = nodeTable.get(each_reg.irReg.regName) ;
-                    stackAllocate(tmp_node);
-                    deleteGraphNode(tmp_node);
+                    if ( !deletedNode.contains(each_reg) ){
+                        var tmp_node = nodeTable.get(each_reg.irReg.regName);
+                        stackAllocate(tmp_node);
+                        deleteGraphNode(tmp_node);
+                    }
+                }
+            }
+
+            for ( var eachMv : mvInstSet ){ // for coalesce
+                if ( eachMv.rd.isVirtual() ){
+                    nodeTable.get(eachMv.rd.irReg.regName).isMvRelated = true ;
+                }
+                if ( eachMv.rs1.isVirtual() ){
+                    nodeTable.get(eachMv.rs1.irReg.regName).isMvRelated = true ;
                 }
             }
 
