@@ -36,6 +36,7 @@ public class msaAllocate {
 
     public static int colorTypeSize = 19;
     public static int savedRegisterSize = 11 ;
+    public int maxRegisterUse = 0 ;
 
     public void linkTogether(asmReg reg1, asmReg reg2) {
         nodeTable.get(reg1.irReg.regName).linkTo(reg2);
@@ -104,6 +105,7 @@ public class msaAllocate {
         }
         for (; i < 32; i++) { // todo 小心 a0 问题
             if (!colorIsUsed[i]) {
+                maxRegisterUse = Math.max(maxRegisterUse, i);
                 tmp_node.dye(i);
                 return;
             }
@@ -115,6 +117,7 @@ public class msaAllocate {
         callInstSet = new HashSet<>();
         mvInstSet = new HashSet<>();
         calledRegSet = new HashSet<>() ;
+        maxRegisterUse = 0 ;
         for (var eachBlock : tempFunction.blockList) {
             blockNameMap.put(eachBlock.blockName, eachBlock);
             for (var eachInst : eachBlock.instList) {
@@ -354,7 +357,7 @@ public class msaAllocate {
             }
 
             // protect saved register
-            for ( int i = 1 ; i <= savedRegisterSize ; i++ ){
+            for ( int i = 1 ; i <= maxRegisterUse - 20 ; i++ ){ // 只保护参与到分配的
                 asmReg tmp_protect_reg = new asmReg(new IRReg(i,"tmp_protect_reg",new integerType(32))) ;
                 asmReg tmp_protected_reg = new physicalReg(null,"s"+String.valueOf(i)) ;
                 GraphNode tmp_protected_node = new GraphNode(tmp_protect_reg) ;
