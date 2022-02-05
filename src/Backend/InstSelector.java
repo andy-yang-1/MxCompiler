@@ -207,11 +207,7 @@ public class InstSelector implements IRVisitor {
                 temp_operand = Constant_to_Reg_access((asmImme) temp_operand) ;
             }
 
-
-            if ( i < 8 ){
-                ((asmReg) temp_operand).isParaCopy = true ;
-                ((asmReg) temp_operand).paraNum = Math.min(tempInst.paraList.size(), 8);
-            } else {
+            if ( i >= 8 ){
                 asmStoreInst temp_store_inst = new asmStoreInst( new physicalReg(null, "sp"), (asmReg) temp_operand) ;
                 temp_store_inst.imme = new asmImme(-20-4*i) ;
                 currentBlock.AddInst(temp_store_inst);

@@ -69,10 +69,8 @@ public class msaAllocate {
 
     public boolean isColorable(GraphNode tmp_node) { // todo 考虑 para_saved register
 
-        if ( calledRegSet.contains(tmp_node.nodeReg) ){
+        if ( calledRegSet.contains(tmp_node.nodeReg) ){ // todo para_saved 和 overCall 同时出现 -> 大问题
             return tmp_node.linkedNodes_counterfeit.size() < colorTypeSize && tmp_node.linkedCalledNodes_counterfeit.size() < savedRegisterSize ;
-        }else if ( tmp_node.nodeReg.isParaCopy ){
-            return tmp_node.linkedNodes_counterfeit.size() < colorTypeSize && tmp_node.nodeReg.paraNum + tmp_node.linkedCalledNodes_counterfeit.size() < savedParaSize ;
         }else{
             return tmp_node.linkedNodes_counterfeit.size() < colorTypeSize;
         }
@@ -94,11 +92,10 @@ public class msaAllocate {
 
         if ( calledRegSet.contains(tmp_node.nodeReg) ){
             i = 21 ;
-        }else if ( tmp_node.nodeReg.isParaCopy ){
-            i = 18 ;
         }else{
             i = 10 ;
         }
+
         for (; i < 32; i++) { // todo 小心 a0 问题
             if (!colorIsUsed[i]) {
                 maxRegisterUse = Math.max(maxRegisterUse, i);
@@ -106,6 +103,7 @@ public class msaAllocate {
                 return;
             }
         }
+        throw new RuntimeException("Error: cannot dye any color") ;
     }
 
     public void funcPreProcess(riscvFunction tempFunction) {
@@ -168,7 +166,7 @@ public class msaAllocate {
             }
 
             // 将参数放入虚拟寄存器中
-            for (int i = 0; i < temp_par_list.size() ; i++) {
+            for (int i = temp_par_list.size() - 1; i >= 0 ; i--) { // todo 注意是逆序 要保证先 mv 后 load
                 asmReg temp_para = new asmReg(funcSet.getValue().irFunction.allocaList.get(i)) ;
                 if (i < 8){
                     funcSet.getValue().blockList.get(0).instList.add(0,new asmMvInst(temp_para,new physicalReg(null,"a"+String.valueOf(i)))) ;
@@ -249,6 +247,14 @@ public class msaAllocate {
                         calledRegSet.add(each_reg) ;
                     }
                 }
+                for (int i = 0 ; i < eachCall.paraList.size() && i < 8 ; i++){
+                    calledRegSet.add(eachCall.paraList.get(i)) ;
+                }
+            }
+
+            // over-protection for the parameters in the whole function
+            for (int i = 0 ; i < temp_par_list.size() && i < 8 ; i++){
+                calledRegSet.add(new asmReg(funcSet.getValue().irFunction.allocaList.get(i))) ;
             }
 
             // build conflict graph
@@ -285,11 +291,11 @@ public class msaAllocate {
                 }
             }
 
-            // 将参数寄存器标记特殊颜色避免染色失败
-            for (int i = 0 ; i < temp_par_list.size() && i < 8 ; i++){
-                nodeTable.get(funcSet.getValue().irFunction.allocaList.get(i).regName).nodeReg.isParaCopy = true ;
-                nodeTable.get(funcSet.getValue().irFunction.allocaList.get(i).regName).nodeReg.paraNum = Math.min(temp_par_list.size(), 8);
-            }
+//            // 将参数寄存器标记特殊颜色避免染色失败
+//            for (int i = 0 ; i < temp_par_list.size() && i < 8 ; i++){
+//                nodeTable.get(funcSet.getValue().irFunction.allocaList.get(i).regName).nodeReg.isParaCopy = true ;
+//                nodeTable.get(funcSet.getValue().irFunction.allocaList.get(i).regName).nodeReg.paraNum = Math.min(temp_par_list.size(), 8);
+//            }
 
             // color the graph
 

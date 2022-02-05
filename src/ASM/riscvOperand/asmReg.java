@@ -6,8 +6,8 @@ public class asmReg extends asmOperand{
     // todo asmReg need type -> address / physical reg ...
     public IRReg irReg ;
 
-    public boolean isParaCopy = false ;
-    public int paraNum = 0 ;
+//    public boolean isParaCopy = false ;
+//    public int paraNum = 0 ;
 
     public asmReg( IRReg tempReg ){
         irReg = tempReg ;
