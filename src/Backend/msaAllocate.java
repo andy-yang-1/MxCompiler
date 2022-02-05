@@ -34,8 +34,9 @@ public class msaAllocate {
     public HashSet<asmMvInst> mvInstSet;
     public HashSet<asmReg> calledRegSet ;
 
-    public static int colorTypeSize = 19;
+    public static int colorTypeSize = 22;
     public static int savedRegisterSize = 11 ;
+    public static int savedParaSize = 14 ;
     public int maxRegisterUse = 0 ;
 
     public void linkTogether(asmReg reg1, asmReg reg2) {
@@ -66,22 +67,14 @@ public class msaAllocate {
         offsetCounter++;
     }
 
-    public boolean isColorable(GraphNode tmp_node) { // todo isColorable 复杂度错误
+    public boolean isColorable(GraphNode tmp_node) { // todo 考虑 para_saved register
 
-        if ( !calledRegSet.contains(tmp_node.nodeReg) ){
-//            if (tmp_node.linkedNodes.size() < colorTypeSize) return true;
-//            int remain_cnt = tmp_node.linkedNodes.size();
-//            for (var each_reg : tmp_node.linkedNodes) {
-//                if (deletedNode.contains(each_reg)) remain_cnt--;
-//            }
-            return tmp_node.linkedNodes_counterfeit.size() < colorTypeSize;
-        }else{
-//            int remain_cnt = tmp_node.linkedNodes.size() , save_cnt = 0 ;
-//            for (var each_reg : tmp_node.linkedNodes){
-//                if (deletedNode.contains(each_reg)) remain_cnt-- ;
-//                if (calledRegSet.contains(tmp_node.nodeReg)&& !deletedNode.contains(each_reg)) save_cnt++ ;
-//            }
+        if ( calledRegSet.contains(tmp_node.nodeReg) ){
             return tmp_node.linkedNodes_counterfeit.size() < colorTypeSize && tmp_node.linkedCalledNodes_counterfeit.size() < savedRegisterSize ;
+        }else if ( tmp_node.nodeReg.isParaCopy ){
+            return tmp_node.linkedNodes_counterfeit.size() < colorTypeSize && tmp_node.nodeReg.paraNum + tmp_node.linkedCalledNodes_counterfeit.size() < savedParaSize ;
+        }else{
+            return tmp_node.linkedNodes_counterfeit.size() < colorTypeSize;
         }
 
     }
@@ -98,10 +91,13 @@ public class msaAllocate {
             }
         }
         int i ;
-        if ( !calledRegSet.contains(tmp_node.nodeReg) ){
-            i = 13 ;
-        }else{
+
+        if ( calledRegSet.contains(tmp_node.nodeReg) ){
             i = 21 ;
+        }else if ( tmp_node.nodeReg.isParaCopy ){
+            i = 18 ;
+        }else{
+            i = 10 ;
         }
         for (; i < 32; i++) { // todo 小心 a0 问题
             if (!colorIsUsed[i]) {
@@ -174,7 +170,12 @@ public class msaAllocate {
             // 将参数放入虚拟寄存器中
             for (int i = 0; i < temp_par_list.size() ; i++) {
                 asmReg temp_para = new asmReg(funcSet.getValue().irFunction.allocaList.get(i)) ;
-                funcSet.getValue().blockList.get(0).instList.add(0,new asmLoadInst(temp_para,new physicalReg(null,"s0"),new asmImme(-i*4-20))) ;
+                if (i < 8){
+                    funcSet.getValue().blockList.get(0).instList.add(0,new asmMvInst(temp_para,new physicalReg(null,"a"+String.valueOf(i)))) ;
+                }else{
+                    funcSet.getValue().blockList.get(0).instList.add(0,new asmLoadInst(temp_para,new physicalReg(null,"s0"),new asmImme(-i*4-20))) ;
+                }
+
                 offsetCounter++ ; // 单纯为了开拓出参数空间
             }
 
@@ -282,6 +283,12 @@ public class msaAllocate {
 //                        }
 //                    }
                 }
+            }
+
+            // 将参数寄存器标记特殊颜色避免染色失败
+            for (int i = 0 ; i < temp_par_list.size() && i < 8 ; i++){
+                nodeTable.get(funcSet.getValue().irFunction.allocaList.get(i).regName).nodeReg.isParaCopy = true ;
+                nodeTable.get(funcSet.getValue().irFunction.allocaList.get(i).regName).nodeReg.paraNum = Math.min(temp_par_list.size(), 8);
             }
 
             // color the graph

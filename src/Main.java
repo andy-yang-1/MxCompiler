@@ -48,8 +48,8 @@ public class Main {
 
             IRModule irModule = new IRModule() ;
             IRBuilder irBuilder = new IRBuilder(gScope,irModule) ;
-            OutputStream IRFile = new FileOutputStream("IROutput.ll") ;
-            IRFile.write(irModule.toString().getBytes());
+//            OutputStream IRFile = new FileOutputStream("IROutput.ll") ;
+//            IRFile.write(irModule.toString().getBytes());
 
             riscvModule asmModule = new riscvModule(irModule) ;
             InstSelector instSelector = new InstSelector(asmModule) ;

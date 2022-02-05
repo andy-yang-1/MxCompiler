@@ -44,6 +44,9 @@ class GraphNode{
         isColored = true ;
         allocated_reg = new physicalReg(nodeReg.irReg,GraphColoringAllocate.allPhysicalReg[temp_color]) ;
     }
+    public void merge( GraphNode other ){
+
+    }
 }
 
 public class GraphColoringAllocate {
@@ -70,8 +73,8 @@ public class GraphColoringAllocate {
 
 
     public static String[] allPhysicalReg =  new String[]{
-            "zero" , "ra" , "sp" , "gp" , "tp" , "t0" , "t1" , "t2" , "t3" , "s0" , "a0" , "a1" , "a2" , "t4" , "t5" , "t6" , "a3" , "a4" , "a5" , "a6" , "a7" , "s1" , "s2" , "s3" , "s4" , "s5" , "s6" , "s7" , "s8" , "s9" , "s10" , "s11"
-    }; // todo x13 -> x31 可以任意分配 // todo x21 -> x31 saved register 保护式分配
+            "zero" , "ra" , "sp" , "gp" , "tp", "s0" , "t0" , "t1" , "t2" , "t3"  , "a0" , "a1" , "a2"  , "a3" , "a4" , "a5" , "a6" , "a7" , "t4" , "t5" , "t6" , "s1" , "s2" , "s3" , "s4" , "s5" , "s6" , "s7" , "s8" , "s9" , "s10" , "s11"
+    }; // todo x10 -> x31 通用分配  // todo x21 -> x31 saved register 保护式分配 // todo x18 -> x31 para-copy register 保护式分配
 
     public static int colorTypeSize = 19 ;
 

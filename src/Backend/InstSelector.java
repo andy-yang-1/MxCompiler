@@ -197,6 +197,7 @@ public class InstSelector implements IRVisitor {
         // 全部视为 integer
 
         // todo call 策略: 直接存储到下一个帧中，同时 分配 a0 -> a7 (保护 builtin)
+        // todo new approach: 对于 a0 -> a7 仅开辟空间但不存储至下一个帧中
 
         ArrayList<asmReg> temp_list = new ArrayList<>() ;
         for ( int i = 0 ;  i < tempInst.paraList.size() ; i++ ){
@@ -205,14 +206,23 @@ public class InstSelector implements IRVisitor {
             if ( !(temp_operand instanceof asmReg) ){
                 temp_operand = Constant_to_Reg_access((asmImme) temp_operand) ;
             }
-            asmStoreInst temp_store_inst = new asmStoreInst( new physicalReg(null, "sp"), (asmReg) temp_operand) ;
-            temp_store_inst.imme = new asmImme(-20-4*i) ;
+
+
             if ( i < 8 ){
-                currentBlock.AddInst(new asmMvInst( new physicalReg(null,"a"+String.valueOf(i)), (asmReg) temp_operand));
+                ((asmReg) temp_operand).isParaCopy = true ;
+                ((asmReg) temp_operand).paraNum = Math.min(tempInst.paraList.size(), 8);
+            } else {
+                asmStoreInst temp_store_inst = new asmStoreInst( new physicalReg(null, "sp"), (asmReg) temp_operand) ;
+                temp_store_inst.imme = new asmImme(-20-4*i) ;
+                currentBlock.AddInst(temp_store_inst);
             }
-            currentBlock.AddInst(temp_store_inst);
             temp_list.add((asmReg) temp_operand) ;
         }
+
+        for ( int i = 0 ; i < tempInst.paraList.size() && i < 8 ; i++ ){
+            currentBlock.AddInst(new asmMvInst(new physicalReg(null,"a"+String.valueOf(i)),temp_list.get(i)));
+        }
+
         currentBlock.AddInst(new asmCallInst(tempInst.calledFunc,temp_list));
 
         if ( !tempInst.resultReg.regType.toString().equals("void") ){
