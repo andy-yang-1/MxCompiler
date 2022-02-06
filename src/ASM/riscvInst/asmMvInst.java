@@ -55,4 +55,7 @@ public class asmMvInst extends asmInst{
             rs1 = new_reg ;
         }
     }
+    public boolean isTrivial(){
+        return rd instanceof physicalReg && rs1 instanceof physicalReg && ((physicalReg) rd).realPhysicalReg.equals(((physicalReg) rs1).realPhysicalReg) ;
+    }
 }

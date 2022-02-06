@@ -77,6 +77,28 @@ public class msaAllocate {
 
     }
 
+    public boolean isCoalescable( GraphNode tmp_node1 , GraphNode tmp_node2 ){
+        if (tmp_node1.linkedNodes.contains(tmp_node2.nodeReg)) return false ; // 有冲突不可以合并
+        HashSet<asmReg> temp_set = new HashSet<>(tmp_node1.linkedNodes_counterfeit);
+        temp_set.addAll(tmp_node2.linkedNodes_counterfeit) ; // 四种情况一个是 called reg 一个不是 但性质会重叠 一个是 called reg 合并的节点也是 called reg
+        if (!calledRegSet.contains(tmp_node1.nodeReg) && !calledRegSet.contains(tmp_node2.nodeReg)){
+            return temp_set.size() < colorTypeSize ;
+        }else{
+            if ( temp_set.size() >= colorTypeSize ) return false ;
+            HashSet<asmReg> temp_call_set = new HashSet<>(tmp_node1.linkedCalledNodes_counterfeit) ;
+            temp_call_set.addAll(tmp_node2.linkedCalledNodes_counterfeit) ;
+            return temp_call_set.size() < savedRegisterSize ;
+        }
+    }
+
+    public void coalesce( GraphNode tmp_node1 , GraphNode tmp_node2 ){
+        tmp_node1.merge(tmp_node2);
+        for ( var each_reg : tmp_node1.combinedNodeSet ){
+            nodeTable.put(each_reg.irReg.regName,tmp_node1) ; // 全部指向同一个节点
+        }
+
+    }
+
     public void physicalAllocate(GraphNode tmp_node) {
         boolean[] colorIsUsed = new boolean[32];
         for (int i = 0; i < 32; i++) {
@@ -117,7 +139,7 @@ public class msaAllocate {
             for (var eachInst : eachBlock.instList) {
                 if (eachInst instanceof asmCallInst)
                     callInstSet.add((asmCallInst) eachInst);
-                if (eachInst instanceof asmMvInst)
+                if (eachInst instanceof asmMvInst && eachInst.getVirtualRegs().size() == 2) // 说明 mv 的 rd 和 rs1 都是虚拟寄存器
                     mvInstSet.add((asmMvInst) eachInst);
             }
         }
@@ -137,7 +159,7 @@ public class msaAllocate {
             colorStack = new Stack<>();
             offsetCounter = 0;
 
-            funcPreProcess(funcSet.getValue());
+
 
             var temp_par_list = funcSet.getValue().irFunction.funcDefNode != null ? funcSet.getValue().irFunction.funcDefNode.parList : funcSet.getValue().irFunction.constructorDefNode.parList ;
 
@@ -164,6 +186,8 @@ public class msaAllocate {
                     }
                 }
             }
+
+            funcPreProcess(funcSet.getValue());
 
             // 将参数放入虚拟寄存器中
             for (int i = temp_par_list.size() - 1; i >= 0 ; i--) { // todo 注意是逆序 要保证先 mv 后 load
@@ -280,22 +304,10 @@ public class msaAllocate {
                                 linkTogether(tempInst.rd,each_vr);
                             }
                         }
-                    }  // todo fix the analysis
+                    }
 
-//                    for (int regIdx1 = 0; regIdx1 < tmp_live_out.size(); regIdx1++) {
-//                        for (int regIdx2 = 0; regIdx2 < tmp_live_out.size(); regIdx2++) {
-//                            if (regIdx1 == regIdx2) continue;
-//                            linkTogether(tmp_live_out.get(regIdx1), tmp_live_out.get(regIdx2));
-//                        }
-//                    }
                 }
             }
-
-//            // 将参数寄存器标记特殊颜色避免染色失败
-//            for (int i = 0 ; i < temp_par_list.size() && i < 8 ; i++){
-//                nodeTable.get(funcSet.getValue().irFunction.allocaList.get(i).regName).nodeReg.isParaCopy = true ;
-//                nodeTable.get(funcSet.getValue().irFunction.allocaList.get(i).regName).nodeReg.paraNum = Math.min(temp_par_list.size(), 8);
-//            }
 
             // color the graph
 
@@ -303,50 +315,56 @@ public class msaAllocate {
                 remainedNode.add(eachNode.nodeReg) ;
             }
 
+            for ( var eachMv : mvInstSet ){
+                nodeTable.get(eachMv.rd.irReg.regName).isMvRelated = true ;
+                nodeTable.get(eachMv.rs1.irReg.regName).isMvRelated = true ;
+            }
+
 
             // settle the rest of the registers to node stack
             while ( deletedNode.size() < nodeTable.size() ){
 
+                // todo try coalesce
+//                boolean mv_coalesce_success = false ;
+//                GraphNode tmp_node1 = null , tmp_node2 = null ;
+//                asmMvInst tmp_mv_inst = null ;
+//                for (var eachMv : mvInstSet){
+//                    tmp_node1 = nodeTable.get(eachMv.rd.irReg.regName) ;
+//                    tmp_node2 = nodeTable.get(eachMv.rs1.irReg.regName) ;
+//                    if ( isCoalescable(tmp_node1,tmp_node2) ){
+//                        mv_coalesce_success = true ;
+//                        tmp_mv_inst = eachMv ;
+//                        break ;
+//                    }
+//                }
+//                if (mv_coalesce_success){
+//                    coalesce(tmp_node1,tmp_node2);
+//                    deleteGraphNode(tmp_node2);
+//                    mvInstSet.remove(tmp_mv_inst) ;
+//                    continue;
+//                }
 
-//                ArrayList<GraphNode> temp_delete_list = new ArrayList<>() ;
-
-                var tmp_iterator = remainedNode.iterator() ;
-                while (tmp_iterator.hasNext()){
-                    var it = tmp_iterator.next() ;
-                    GraphNode tmp_node = nodeTable.get(it.irReg.regName) ;
-                    if ( isColorable(tmp_node) ){
-                        colorStack.push(tmp_node) ;
-                        deleteGraphNode(tmp_node) ;
+                boolean simplify_success = false ;
+                GraphNode tmp_node = null ;
+                for (var eachNode : remainedNode){
+                    tmp_node = nodeTable.get(eachNode.irReg.regName) ;
+                    if (isColorable(tmp_node)){
+                        simplify_success = true ;
                         break ;
                     }
                 }
 
-//                for ( var eachReg : remainedNode ){
-//                    GraphNode tmp_node = nodeTable.get(eachReg.irReg.regName) ;
-//                    if ( isColorable(tmp_node) ){
-//                        colorStack.push(tmp_node) ;
-//                        temp_delete = tmp_node ;
-//                        deleteGraphNode(tmp_node);
-//                        break ;
-//                    }
-//                }
-//                for ( var eachNode : temp_delete_list ){
-//                    deleteGraphNode(eachNode);
-//                }
+                if (simplify_success){
+                    colorStack.push(tmp_node) ;
+                    deleteGraphNode(tmp_node) ;
+                }
 
 
                 // can not find a plan
-                if ( deletedNode.size() < nodeTable.size() && !tmp_iterator.hasNext() ){ // todo 复杂度错误
+                if ( deletedNode.size() < nodeTable.size() && !simplify_success ){ // todo 复杂度错误
                     var tmpReg = remainedNode.iterator().next() ;
                     stackAllocate(nodeTable.get(tmpReg.irReg.regName));
                     deleteGraphNode(nodeTable.get(tmpReg.irReg.regName));
-//                    for ( var eachNode : nodeTable.values() ){
-//                        if ( !deletedNode.contains(eachNode.nodeReg) ){
-//                            stackAllocate(eachNode);
-//                            deleteGraphNode(eachNode);
-//                            break ;
-//                        }
-//                    }
                 }
 
             }
@@ -405,6 +423,10 @@ public class msaAllocate {
             tempBlock.instList.add(0,new asmLiInst(new physicalReg(null,"sp"),new physicalReg(null,"sp"),new asmImme(-stack_size)));
 
 
+            // todo clear all the trivial mv Inst
+            for (var eachBlock : funcSet.getValue().blockList){
+                eachBlock.instList.removeIf(tempInst -> tempInst instanceof asmMvInst && ((asmMvInst) tempInst).isTrivial());
+            }
 
         }
 

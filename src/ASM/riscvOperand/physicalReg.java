@@ -12,7 +12,7 @@ public class physicalReg extends asmReg{
         a0 , a1 , a2 , a3 , a4 , a5 , a6 , a7
     };
 
-    String realPhysicalReg ;
+    public String realPhysicalReg ;
 
     public physicalReg(IRReg tempReg ,String temp_type ) {
         super(tempReg); // todo null 意味着 zero 寄存器
