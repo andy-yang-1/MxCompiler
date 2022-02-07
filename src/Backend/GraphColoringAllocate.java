@@ -14,47 +14,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Stack;
 
-class GraphNode{
-    public asmReg nodeReg ;
-    public asmReg allocated_reg ;
-    public HashSet<asmReg> linkedNodes ;
-    public HashSet<asmReg> linkedCalledNodes ; // todo caller_saved nodes which link to the specific node
-    public HashSet<asmReg> linkedNodes_counterfeit ; // graph copy
-    public HashSet<asmReg> linkedCalledNodes_counterfeit ; // graph copy
-    public HashSet<asmReg> combinedNodeSet ;
-    public boolean isColored = false ;
-    public boolean isMvRelated = false ;
-    public int colorNum ; // todo -1 表示为 address register
-    public GraphNode( asmReg temp_reg ){
-        nodeReg = temp_reg ;
-        linkedNodes = new HashSet<>() ;
-        linkedCalledNodes = new HashSet<>() ;
-        linkedNodes_counterfeit = new HashSet<>() ;
-        linkedCalledNodes_counterfeit = new HashSet<>() ;
-        combinedNodeSet = new HashSet<>() ;
-        combinedNodeSet.add(temp_reg) ;
-    }
-    public void linkTo( asmReg to_reg ){
-        linkedNodes.add(to_reg) ;
-        linkedNodes_counterfeit.add(to_reg) ;
-    }
-    public void remove( asmReg to_reg ){
-        linkedNodes_counterfeit.remove(to_reg) ;
-        linkedCalledNodes_counterfeit.remove(to_reg) ;
-    }
-    public void dye( int temp_color ){
-        colorNum = temp_color ;
-        isColored = true ;
-        allocated_reg = new physicalReg(nodeReg.irReg,GraphColoringAllocate.allPhysicalReg[temp_color]) ;
-    }
-    public void merge( GraphNode other ){
-        linkedNodes.addAll(other.linkedNodes) ;
-        linkedCalledNodes.addAll(other.linkedCalledNodes) ;
-        linkedNodes_counterfeit.addAll(other.linkedNodes_counterfeit) ;
-        linkedCalledNodes_counterfeit.addAll(other.linkedCalledNodes_counterfeit) ;
-        combinedNodeSet.addAll(other.combinedNodeSet) ;
-    }
-}
 
 public class GraphColoringAllocate {
 
@@ -279,10 +238,10 @@ public class GraphColoringAllocate {
 
             for ( var eachMv : mvInstSet ){ // for coalesce
                 if ( eachMv.rd.isVirtual() ){
-                    nodeTable.get(eachMv.rd.irReg.regName).isMvRelated = true ;
+                    nodeTable.get(eachMv.rd.irReg.regName).addMvInst(eachMv);
                 }
                 if ( eachMv.rs1.isVirtual() ){
-                    nodeTable.get(eachMv.rs1.irReg.regName).isMvRelated = true ;
+                    nodeTable.get(eachMv.rs1.irReg.regName).addMvInst(eachMv);
                 }
             }
 
