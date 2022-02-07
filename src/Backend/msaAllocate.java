@@ -316,18 +316,18 @@ public class msaAllocate {
         }
 
         for ( var eachNode : nodeTable.values() ){
+            for (var each_reg : eachNode.linkedNodes){
+                if (calledRegSet.contains(each_reg)){
+                    eachNode.linkedCalledNodes.add(each_reg) ;
+                    eachNode.linkedCalledNodes_counterfeit.add(each_reg) ;
+                }
+            }
             if ( !isColorable(eachNode) ){
                 spillWorkList.add(eachNode.nodeReg) ;
             }else if (eachNode.isMvRelated()){
                 freezeWorkList.add(eachNode.nodeReg) ;
             }else{
                 simplifyWorkList.add(eachNode.nodeReg) ;
-            }
-            for (var each_reg : eachNode.linkedNodes){
-                if (calledRegSet.contains(each_reg)){
-                    eachNode.linkedCalledNodes.add(each_reg) ;
-                    eachNode.linkedCalledNodes_counterfeit.add(each_reg) ;
-                }
             }
         }
 
