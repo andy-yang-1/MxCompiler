@@ -17,6 +17,7 @@ public class asmReg extends asmOperand{
         return irReg.toString();
     }
 
+    @Override
     public int hashCode(){
         return irReg.regName.hashCode() ;
     }

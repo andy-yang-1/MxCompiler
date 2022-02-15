@@ -345,12 +345,20 @@ public class InstSelector implements IRVisitor {
     }
 
     @Override
-    public void visit(truncInst tempInst) {
-        currentBlock.AddInst(new asmMvInst(new asmReg(tempInst.resultReg),new asmReg((IRReg) tempInst.rightTruncOperand)));
+    public void visit(truncInst tempInst) { // todo while true problem
+        asmOperand temp_operand = getAsmOperand(tempInst.rightTruncOperand) ;
+        if (temp_operand instanceof asmImme){
+            temp_operand = Constant_to_Reg_access((asmImme) temp_operand) ;
+        }
+        currentBlock.AddInst(new asmMvInst(new asmReg(tempInst.resultReg),(asmReg) temp_operand));
     }
 
     @Override
     public void visit(zextInst tempInst) {
-        currentBlock.AddInst(new asmMvInst(new asmReg(tempInst.resultReg),new asmReg((IRReg) tempInst.rightZextOperand)));
+        asmOperand temp_operand = getAsmOperand(tempInst.rightZextOperand) ;
+        if (temp_operand instanceof asmImme){
+            temp_operand = Constant_to_Reg_access((asmImme) temp_operand) ;
+        }
+        currentBlock.AddInst(new asmMvInst(new asmReg(tempInst.resultReg), (asmReg) temp_operand));
     }
 }

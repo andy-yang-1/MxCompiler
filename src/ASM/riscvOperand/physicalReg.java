@@ -2,6 +2,8 @@ package ASM.riscvOperand;
 
 import IR.IROperand.IRReg;
 
+import java.util.Objects;
+
 public class physicalReg extends asmReg{
 
      public enum physicalRegType{
@@ -21,5 +23,18 @@ public class physicalReg extends asmReg{
 
     public String toString() {
         return realPhysicalReg ;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        physicalReg that = (physicalReg) o;
+        return realPhysicalReg.equals(that.realPhysicalReg);
+    }
+
+    @Override
+    public int hashCode() {
+        return realPhysicalReg.hashCode();
     }
 }

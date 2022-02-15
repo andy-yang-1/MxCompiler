@@ -11,6 +11,17 @@ public abstract class asmInst {
     public abstract ArrayList<asmReg> getVirtualRegs() ;
     public abstract void replaceReg( asmReg old_reg , asmReg new_reg ) ;
 
+    public ArrayList<asmReg> getUsedRegs(){
+        if (this instanceof asmMvInst){
+            ArrayList<asmReg> tmp_list = new ArrayList<>() ;
+            if (this.rd instanceof physicalReg && ((physicalReg) this.rd).realPhysicalReg.equals("sp")) return tmp_list ; // todo 特判 mv sp s0
+            tmp_list.add(this.rd) ;
+            tmp_list.add(((asmMvInst) this).rs1) ;
+            return tmp_list ;
+        }
+        return this.getVirtualRegs() ;
+    }
+
     public HashSet<asmReg> live_in = new HashSet<>() , live_out = new HashSet<>() ; // todo for data analysis
 
     // todo rd = t0 , rs1 = t1 , rs2 = t2
