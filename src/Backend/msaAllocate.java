@@ -69,13 +69,13 @@ public class msaAllocate {
 
         if (tmp_node.isColored) return true ;
 
-        return tmp_node.linkedNodes_counterfeit.size() < colorTypeSize ;
+//        return tmp_node.linkedNodes_counterfeit.size() < colorTypeSize ;
 
-//        if ( calledRegSet.contains(tmp_node.nodeReg) ){ // todo para_saved 和 overCall 同时出现 -> 大问题
-//            return tmp_node.linkedNodes_counterfeit.size() < colorTypeSize && tmp_node.linkedCalledNodes_counterfeit.size() < savedRegisterSize ; // todo 削弱 call 要求
-//        }else{
-//            return tmp_node.linkedNodes_counterfeit.size() < colorTypeSize;
-//        }
+        if ( calledRegSet.contains(tmp_node.nodeReg) ){ // todo para_saved 和 overCall 同时出现 -> 大问题
+            return tmp_node.linkedNodes_counterfeit.size() < colorTypeSize && tmp_node.linkedCalledNodes_counterfeit.size() < savedRegisterSize ; // todo 削弱 call 要求
+        }else{
+            return tmp_node.linkedNodes_counterfeit.size() < colorTypeSize;
+        }
 
     }
 
@@ -108,7 +108,7 @@ public class msaAllocate {
         stackAllocate(tmp_node);
     }
 
-    public void funcPreProcess(riscvFunction tempFunction) {
+    public void funcPreProcess(riscvFunction tempFunction) { // todo while true runtime error / saved register taken into account
 
         blockNameMap = new HashMap<>();
         callInstSet = new HashSet<>();
@@ -318,12 +318,12 @@ public class msaAllocate {
         }
 
         for ( var eachNode : nodeTable.values() ){
-//            for (var each_reg : eachNode.linkedNodes){
-//                if (calledRegSet.contains(each_reg)){
-//                    eachNode.linkedCalledNodes.add(each_reg) ;
-//                    eachNode.linkedCalledNodes_counterfeit.add(each_reg) ;
-//                }
-//            }
+            for (var each_reg : eachNode.linkedNodes){
+                if (calledRegSet.contains(each_reg)){
+                    eachNode.linkedCalledNodes.add(each_reg) ;
+                    eachNode.linkedCalledNodes_counterfeit.add(each_reg) ;
+                }
+            }
             if ( !isColorable(eachNode) ){
                 spillWorkList.add(eachNode.nodeReg) ;
             }else if (eachNode.isMvRelated()){
@@ -389,15 +389,15 @@ public class msaAllocate {
             return true ;
         }
 
-        HashSet<asmReg> tmp_set1 = new HashSet<>(tmp_node1.linkedNodes_counterfeit)  ;
+        HashSet<asmReg> tmp_set1 = new HashSet<>(tmp_node1.linkedNodes_counterfeit) , tmp_set2 = new HashSet<>(tmp_node1.linkedCalledNodes_counterfeit)  ;
         tmp_set1.addAll(tmp_node2.linkedNodes_counterfeit) ;
-//        tmp_set2.addAll(tmp_node2.linkedCalledNodes_counterfeit) ;
-        return tmp_set1.size() < colorTypeSize ;
-//        if (calledRegSet.contains(tmp_reg1)||calledRegSet.contains(tmp_reg2)){
-//            return tmp_set1.size() < colorTypeSize && tmp_set2.size() < savedRegisterSize ;
-//        }else{
-//            return tmp_set1.size() < colorTypeSize ;
-//        }
+        tmp_set2.addAll(tmp_node2.linkedCalledNodes_counterfeit) ;
+//        return tmp_set1.size() < colorTypeSize ;
+        if (calledRegSet.contains(tmp_reg1)||calledRegSet.contains(tmp_reg2)){
+            return tmp_set1.size() < colorTypeSize && tmp_set2.size() < savedRegisterSize ;
+        }else{
+            return tmp_set1.size() < colorTypeSize ;
+        }
     }
 
     public void EnableMoves( asmReg tmp_reg ){
@@ -422,9 +422,9 @@ public class msaAllocate {
         tmp_node1.relatedMvInsts.addAll(tmp_node2.relatedMvInsts) ;
         EnableMoves(tmp_reg2) ;
         tmp_node1.linkedNodes.addAll(tmp_node2.linkedNodes) ;
-//        tmp_node1.linkedCalledNodes.addAll(tmp_node2.linkedCalledNodes) ;
+        tmp_node1.linkedCalledNodes.addAll(tmp_node2.linkedCalledNodes) ;
         tmp_node1.linkedNodes_counterfeit.addAll(tmp_node2.linkedNodes_counterfeit) ;
-//        tmp_node1.linkedCalledNodes_counterfeit.addAll(tmp_node2.linkedCalledNodes_counterfeit) ;
+        tmp_node1.linkedCalledNodes_counterfeit.addAll(tmp_node2.linkedCalledNodes_counterfeit) ;
         if (calledRegSet.contains(tmp_reg1)||calledRegSet.contains(tmp_reg2)){
             calledRegSet.add(tmp_reg1) ;
         }
@@ -433,13 +433,13 @@ public class msaAllocate {
             GraphNode tmp_link_node = nodeTable.get(each_reg) ;
             tmp_link_node.remove(tmp_reg2); // decrement degree (inst-level)
             tmp_link_node.linkedNodes.remove(tmp_reg2) ;
-//            tmp_link_node.linkedCalledNodes.remove(tmp_reg2) ;
+            tmp_link_node.linkedCalledNodes.remove(tmp_reg2) ;
             tmp_link_node.linkedNodes_counterfeit.add(tmp_reg1) ; // add edge
             tmp_link_node.linkedNodes.add(tmp_reg1) ;
-//            if (calledRegSet.contains(tmp_reg1)){
-//                tmp_link_node.linkedCalledNodes_counterfeit.add(tmp_reg1) ;
-//                tmp_link_node.linkedCalledNodes.add(tmp_reg1) ;
-//            }
+            if (calledRegSet.contains(tmp_reg1)){
+                tmp_link_node.linkedCalledNodes_counterfeit.add(tmp_reg1) ;
+                tmp_link_node.linkedCalledNodes.add(tmp_reg1) ;
+            }
             if (spillWorkList.contains(each_reg) && isColorable(tmp_link_node)){ // 添加 spillWorkList 判断避免 重复添加
                 spillWorkList.remove(each_reg) ;
                 if (tmp_link_node.isMvRelated()){
