@@ -4,6 +4,7 @@ import ASTNodeType.DefNodeType.ClassDefNode;
 import ASTNodeType.DefNodeType.FuncDefNode;
 import ASTNodeType.DefNodeType.SingleDefNode;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class globalScope {
@@ -11,6 +12,7 @@ public class globalScope {
     public HashMap<String,SingleDefNode> members ; // variable name -> type
     public HashMap<String, FuncDefNode> funcs ; // function name -> return type
     public HashMap<String, ClassDefNode> registered_class ; // class name -> ClassDefNode
+    public ArrayList<String> initialize_seq ; // 确定初始化顺序
     public FuncDefNode array_size_func ; // 数组内建函数
     public boolean inFunc , inClass ;
 
@@ -20,6 +22,7 @@ public class globalScope {
         members = new HashMap<>() ;
         funcs = new HashMap<>() ;
         registered_class = new HashMap<>() ;
+        initialize_seq = new ArrayList<>() ;
         // todo 内联函数添加 基本类添加 普适方法添加
 
         // normal class

@@ -24,7 +24,7 @@ import Util.position;
 import java.util.ArrayList;
 import java.util.Stack;
 
-public class IRBuilder implements ASTVisitor {
+public class IRBuilder implements ASTVisitor { // todo IR global 出现 初始化顺序问题 !!!
 
     globalScope gScope ;
     Scope currentScope ;
@@ -234,7 +234,8 @@ public class IRBuilder implements ASTVisitor {
             eachGlobal.singleDefNode.expAns.accept(this);
         }
 
-        for ( var eachGlobal : irModule.globalVariableTable.values() ){ // todo avoid iterate and write collide
+        for ( var eachGlobalname : gScope.initialize_seq ){ // todo global initialize sequence wrong !!!
+            var eachGlobal = irModule.globalVariableTable.get(eachGlobalname) ;
             if ( eachGlobal.singleDefNode.expAns != null && !eachGlobal.isStringConstant ){
                 if ( eachGlobal.singleDefNode.parType.isString() ){
                     currentBlock.AddInst(new storeInst(eachGlobal.singleDefNode.expAns.expOperand,eachGlobal));

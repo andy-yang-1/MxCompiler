@@ -151,6 +151,7 @@ public class SymbolCollector implements ASTVisitor {
                 throw new semanticError("duplicated variable name ", tempNode.nodePos);
             }
             gScope.members.put(each.parName,each) ;
+            gScope.initialize_seq.add(each.parName) ;
         }
     }
 
